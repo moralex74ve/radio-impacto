@@ -1,12 +1,15 @@
 {
   "name": "impacto-digital-radio",
+  "homepage": "https://moralex74ve.github.io/radio-impacto",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
