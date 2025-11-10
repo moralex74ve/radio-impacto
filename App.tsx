@@ -148,7 +148,7 @@ const App: React.FC = () => {
       }}
     >
       <img
-        src="/Logo.svg"
+        src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
         alt="Impacto Digital Logo"
         className="block w-72 md:w-80 h-40 md:h-44 mb-0 p-0 object-cover"
       />

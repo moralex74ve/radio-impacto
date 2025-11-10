@@ -1,6 +1,7 @@
 {
   "name": "impacto-digital-radio",
   "homepage": "https://moralex74ve.github.io/radio-impacto",
+  "__note__": "este es el video donde se explica como desplegar en gh-pages: https://youtu.be/TOPkdU9h5es?si=X6Gt3bDrel9WGOtU",
   "private": true,
   "version": "0.0.0",
   "type": "module",
