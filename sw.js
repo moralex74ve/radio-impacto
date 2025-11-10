@@ -1,12 +1,14 @@
-const CACHE_NAME = 'impacto-digital-radio-v1';
+const CACHE_NAME = 'impacto-digital-radio-v2';
+const BASE_PATH = '/radio-impacto/';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/index.css',
-  '/index.js',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  BASE_PATH,
+  `${BASE_PATH}index.html`,
+  `${BASE_PATH}index.css`,
+  `${BASE_PATH}index.js`,
+  `${BASE_PATH}manifest.json`,
+  `${BASE_PATH}icon-192.png`,
+  `${BASE_PATH}icon-512.png`,
+  `${BASE_PATH}favicon.ico`,
   'https://cdn.tailwindcss.com',
   'https://aistudiocdn.com/react-dom@^19.2.0/',
   'https://aistudiocdn.com/react@^19.2.0/',
