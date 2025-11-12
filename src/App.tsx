@@ -197,11 +197,11 @@ const App: React.FC = () => {
       </div>
       
       {/* Iconos de redes sociales */}
-      <div className="mt-6">
+      <div className="mt-1 ">
         <SocialIcons />
       </div>
 
-      <div className="mt-3 pt-10 w-full flex items-center justify-center">
+      <div className="mt-3 pt-6 w-full flex items-center justify-center">
         <span className="inline-block bg-gradient-to-r from-red-600 to-red-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md tracking-wide text-center max-w-xs">
           La Radio del Pueblo de Dios
           <span className="block text-xs font-semibold opacity-90">
@@ -210,7 +210,7 @@ const App: React.FC = () => {
         </span>
       </div>
       {/* WhatsApp button aligned to the right */}
-      <div className="w-full flex justify-end mt-12">
+      <div className="w-full flex justify-end mt-4">
         <a
           href="https://wa.me/584267793042"
           target="_blank"

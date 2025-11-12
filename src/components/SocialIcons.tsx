@@ -2,7 +2,7 @@ import React from 'react';
 
 export const SocialIcons = () => {
   return (
-    <div className="flex justify-center space-x-6 mt-4">
+    <div className="flex justify-center space-x-6 mt-2">
       {/* Instagram */}
       <a 
         href="https://www.instagram.com/impactodigitalfm/" 
