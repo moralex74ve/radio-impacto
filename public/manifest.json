@@ -1,6 +1,13 @@
 {
   "short_name": "Impacto Digital",
   "name": "Impacto Digital Radio",
+  "description": "La Radio del Pueblo de Dios - Renovando Tu Vida",
+  "start_url": "/radio-impacto/",
+  "scope": "/radio-impacto/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#111827",
+  "background_color": "#111827",
   "icons": [
     {
       "src": "icon-192.png",
@@ -15,12 +22,5 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/radio-impacto/",
-  "scope": "/radio-impacto/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#111827",
-  "background_color": "#111827",
-  "description": "Escucha la radio Impacto Digital en vivo.",
   "prefer_related_applications": false
 }

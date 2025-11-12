@@ -1,15 +1,20 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { StreamStatus } from "./types";
+import { StreamStatus } from "../types";
 import { PlayIcon } from "./components/PlayIcon";
 import { PauseIcon } from "./components/PauseIcon";
 import { SpinnerIcon } from "./components/SpinnerIcon";
 import { OfflineIcon } from "./components/OfflineIcon";
 import { VolumeIcon } from "./components/VolumeIcon";
+import { InstallButton } from "./components/InstallButton";
 
-const STREAM_URL = "https://node-17.zeno.fm/9hfny901wwzuv";
+/* const STREAM_URL = "https://node-17.zeno.fm/9hfny901wwzuv";
 // Zeno.fm metadata API endpoint
 const METADATA_URL =
-  "https://stream.zeno.fm/api/v2/public/nowplaying/9hfny901wwzuv";
+  "https://stream.zeno.fm/api/v2/public/nowplaying/9hfny901wwzuv"; */
+
+const STREAM_URL = "https://control.voztream.com/8126/stream";
+// Voztream metadata API endpoint
+const METADATA_URL = "https://control.voztream.com/cp/get_info.php?p=8126";
 
 const App: React.FC = () => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
@@ -23,23 +28,29 @@ const App: React.FC = () => {
     try {
       const response = await fetch(METADATA_URL);
       if (!response.ok) {
-        // Don't throw for server errors, just fallback gracefully
+        // Si hay un error en la respuesta, usamos el título por defecto
         setNowPlaying("Impacto Digital");
         return;
       }
-      const responseText = await response.text();
-      // Only parse if the response text is not empty
-      if (responseText) {
-        const data = JSON.parse(responseText);
-        if (data?.now_playing?.song?.title) {
-          const title = data.now_playing.song.title;
-          const artist = data.now_playing.song.artist;
-          setNowPlaying(artist ? `${title} - ${artist}` : title);
-        } else {
-          setNowPlaying("Impacto Digital");
-        }
+      
+      const data = await response.json();
+      
+      // Verificamos la estructura de la respuesta de Voztream
+      if (data?.song) {
+        // Si hay información de la canción en la respuesta
+        setNowPlaying(data.song);
+      } else if (data?.current_song) {
+        // Otra posible estructura de respuesta
+        setNowPlaying(data.current_song);
+      } else if (data?.now_playing?.song) {
+        // Estructura alternativa que usa Zeno.fm
+        const { title, artist } = data.now_playing.song;
+        setNowPlaying(artist ? `${title} - ${artist}` : title);
+      } else if (data?.title) {
+        // Si la respuesta tiene un campo 'title' directo
+        setNowPlaying(data.title);
       } else {
-        // If response is empty, just keep the default
+        // Si no encontramos la información esperada, mostramos el título por defecto
         setNowPlaying("Impacto Digital");
       }
     } catch (error) {
@@ -152,7 +163,6 @@ const App: React.FC = () => {
         alt="Impacto Digital Logo"
         className="block w-72 md:w-80 h-40 md:h-44 mb-0 p-0 object-cover"
       />
-      <p className="text-amber-400 text-lg mb-4 h-6">{nowPlaying}</p>
 
       <button
         onClick={togglePlayPause}
@@ -164,11 +174,14 @@ const App: React.FC = () => {
         {renderStatusIcon()}
       </button>
 
-      <p className="text-sm tracking-widest text-white/80 mb-8 h-4">
-        {getStatusText()}
-      </p>
+      <div className="flex flex-col items-center my-6 space-y-4">
+        <p className="text-sm tracking-widest text-white/80 h-4">
+          {getStatusText()}
+        </p>
+        <p className="text-white text-lg h-6">{nowPlaying}</p>
+      </div>
 
-      <div className="flex items-center space-x-3 w-full max-w-xs">
+      <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
         <VolumeIcon className="w-6 h-6 text-amber-400" />
         <input
           type="range"
@@ -212,6 +225,9 @@ const App: React.FC = () => {
           <span className="text-sm font-medium">Contactar</span>
         </a>
       </div>
+      
+      {/* Botón de instalación para PWA */}
+      <InstallButton />
     </div>
   );
 };
