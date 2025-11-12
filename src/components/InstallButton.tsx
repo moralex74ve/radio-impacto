@@ -50,7 +50,7 @@ export const InstallButton = () => {
   return (
     <button
       onClick={handleInstallClick}
-      className="fixed bottom-4 right-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center space-x-2 z-50"
+      className="fixed bottom-4 left-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center space-x-2 z-50"
       aria-label="Instalar aplicación"
     >
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

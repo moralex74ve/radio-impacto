@@ -6,6 +6,7 @@ import { SpinnerIcon } from "./components/SpinnerIcon";
 import { OfflineIcon } from "./components/OfflineIcon";
 import { VolumeIcon } from "./components/VolumeIcon";
 import { InstallButton } from "./components/InstallButton";
+import { SocialIcons } from "./components/SocialIcons";
 
 /* const STREAM_URL = "https://node-17.zeno.fm/9hfny901wwzuv";
 // Zeno.fm metadata API endpoint
@@ -193,6 +194,11 @@ const App: React.FC = () => {
           className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
           aria-label="Control de volumen"
         />
+      </div>
+      
+      {/* Iconos de redes sociales */}
+      <div className="mt-6">
+        <SocialIcons />
       </div>
 
       <div className="mt-3 pt-10 w-full flex items-center justify-center">
