@@ -13,9 +13,11 @@ import { SocialIcons } from "./components/SocialIcons";
 const METADATA_URL =
   "https://stream.zeno.fm/api/v2/public/nowplaying/9hfny901wwzuv"; */
 
-const STREAM_URL = "https://control.voztream.com/8126/stream";
+const PRIMARY_STREAM_URL = "https://control.voztream.com/8126/stream";
+const BACKUP_STREAM_URL = "https://stream.zeno.fm/9hfny901wwzuv";
 // Voztream metadata API endpoint
 const METADATA_URL = "https://control.voztream.com/cp/get_info.php?p=8126";
+const STREAM_CHECK_INTERVAL = 600000; // 10 minutos
 
 const App: React.FC = () => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
@@ -24,6 +26,7 @@ const App: React.FC = () => {
   const [volume, setVolume] = useState(0.4);
   const [nowPlaying, setNowPlaying] = useState<string>("Impacto Digital");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const isUsingBackupRef = useRef(false);
 
   const fetchMetadata = useCallback(async () => {
     try {
@@ -67,13 +70,31 @@ const App: React.FC = () => {
   }, [fetchMetadata]);
 
   useEffect(() => {
-    const audio = new Audio(STREAM_URL);
+    const audio = new Audio(PRIMARY_STREAM_URL);
     audio.crossOrigin = "anonymous";
     audioRef.current = audio;
 
     const handleCanPlay = () => setStreamStatus(StreamStatus.Paused);
     const handlePlaying = () => setStreamStatus(StreamStatus.Playing);
-    const handleError = () => setStreamStatus(StreamStatus.Offline);
+    const handleError = () => {
+      if (!audioRef.current) return;
+
+      if (!isUsingBackupRef.current) {
+        isUsingBackupRef.current = true;
+        audioRef.current.src = BACKUP_STREAM_URL;
+        audioRef.current.load();
+        audioRef.current
+          .play()
+          .then(() => {
+            setStreamStatus(StreamStatus.Playing);
+          })
+          .catch(() => {
+            setStreamStatus(StreamStatus.Offline);
+          });
+      } else {
+        setStreamStatus(StreamStatus.Offline);
+      }
+    };
     const handlePause = () => setStreamStatus(StreamStatus.Paused);
     const handleEnded = () => setStreamStatus(StreamStatus.Offline);
 
@@ -92,6 +113,45 @@ const App: React.FC = () => {
       audio.pause();
       audioRef.current = null;
     };
+  }, []);
+
+  // Revisa periódicamente si el stream principal está disponible cuando
+  // se está usando la URL de respaldo.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!audioRef.current || !isUsingBackupRef.current) return;
+
+      const audio = audioRef.current;
+      const wasPlaying = !audio.paused;
+
+      audio.src = PRIMARY_STREAM_URL;
+      audio.load();
+      audio
+        .play()
+        .then(() => {
+          // Se pudo reproducir la URL principal, dejamos de usar el backup
+          isUsingBackupRef.current = false;
+          setStreamStatus(StreamStatus.Playing);
+        })
+        .catch(() => {
+          // No se pudo reproducir la principal, volvemos al backup
+          audio.src = BACKUP_STREAM_URL;
+          audio.load();
+          if (wasPlaying) {
+            audio
+              .play()
+              .then(() => {
+                setStreamStatus(StreamStatus.Playing);
+              })
+              .catch(() => {
+                setStreamStatus(StreamStatus.Offline);
+              });
+          }
+          isUsingBackupRef.current = true;
+        });
+    }, STREAM_CHECK_INTERVAL);
+
+    return () => clearInterval(interval);
   }, []);
 
   const togglePlayPause = useCallback(() => {
