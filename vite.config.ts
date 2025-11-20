@@ -1,7 +1,8 @@
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
 
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
   // Cargar solo las variables de entorno que necesitamos
@@ -19,7 +20,7 @@ export default defineConfig(({ command, mode }) => {
       port: 3000,
       host: "0.0.0.0",
     },
-    plugins: [react()],
+    plugins: [react(), tailwindcss()], 
     // Configuración base para GitHub Pages
     base: '/radio-impacto/',
     build: {
