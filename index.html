@@ -5,33 +5,76 @@
     <base href="/radio-impacto/" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Impacto Digital Radio</title>
-    <link rel="manifest" href="/radio-impacto/manifest.json" />
-    <link rel="apple-touch-icon" href="/radio-impacto/icon-192.png" />
+    
+    <!-- SEO Meta Tags -->
+    <title>Impacto Digital Radio - La Radio del Pueblo de Dios | Transmisión en Vivo 24/7</title>
+    <meta name="description" content="Escucha Impacto Digital Radio en vivo. Radio cristiana evangélica transmitiendo 24/7 con música, predicaciones y programas que renuevan tu vida. La Radio del Pueblo de Dios." />
+    <meta name="keywords" content="radio cristiana, radio evangélica, música cristiana, predicaciones, radio en vivo, impacto digital, radio del pueblo de dios, streaming cristiano" />
+    <meta name="author" content="Impacto Digital Radio" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://moralex74ve.github.io/radio-impacto/" />
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://moralex74ve.github.io/radio-impacto/" />
+    <meta property="og:title" content="Impacto Digital Radio - La Radio del Pueblo de Dios" />
+    <meta property="og:description" content="Escucha nuestra transmisión en vivo 24/7. Radio cristiana evangélica con música, predicaciones y programas que renuevan tu vida." />
+    <meta property="og:image" content="https://moralex74ve.github.io/radio-impacto/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content="Impacto Digital Radio" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://moralex74ve.github.io/radio-impacto/" />
+    <meta name="twitter:title" content="Impacto Digital Radio - La Radio del Pueblo de Dios" />
+    <meta name="twitter:description" content="Escucha nuestra transmisión en vivo 24/7. Radio cristiana evangélica con música, predicaciones y programas que renuevan tu vida." />
+    <meta name="twitter:image" content="https://moralex74ve.github.io/radio-impacto/og-image.png" />
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <meta name="theme-color" content="#111827" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Radio Impacto" />
-    <meta name="description" content="La Radio del Pueblo de Dios - Renovando Tu Vida" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Radio Impacto" />
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "RadioStation",
+      "name": "Impacto Digital Radio",
+      "alternateName": "La Radio del Pueblo de Dios",
+      "description": "Radio cristiana evangélica transmitiendo 24/7 con música, predicaciones y programas que renuevan tu vida",
+      "url": "https://moralex74ve.github.io/radio-impacto/",
+      "logo": "https://moralex74ve.github.io/radio-impacto/icon-512.png",
+      "image": "https://moralex74ve.github.io/radio-impacto/og-image.png",
+      "sameAs": [
+        "https://www.instagram.com/impactodigitalradio"
+      ],
+      "broadcastFrequency": "Online Streaming",
+      "genre": "Christian, Gospel, Religious",
+      "inLanguage": "es",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+58-426-779-3042",
+        "contactType": "Customer Service",
+        "availableLanguage": "Spanish"
+      }
+    }
+    </script>
+    
     <style>
       body {
         -webkit-tap-highlight-color: transparent;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+    <link rel="stylesheet" href="/index.css">
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
@@ -39,7 +82,7 @@
       // Registrar el Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+          navigator.serviceWorker.register('/radio-impacto/sw.js')
             .then(registration => {
               console.log('ServiceWorker registrado con éxito:', registration.scope);
             })

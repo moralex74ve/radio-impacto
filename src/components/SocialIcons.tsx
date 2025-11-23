@@ -1,8 +1,9 @@
 import React from 'react';
+import { ShareButton } from './ShareButton';
 
 export const SocialIcons = () => {
   return (
-    <div className="flex justify-center space-x-4 mt-2">
+    <div className="flex justify-center items-center space-x-4 mt-2">
       {/* Instagram */}
       <a 
         href="https://www.instagram.com/impactodigitalfm/" 
@@ -37,6 +38,9 @@ export const SocialIcons = () => {
           />
         </svg>
       </a>
+      
+      {/* Botón de Compartir */}
+      <ShareButton />
     </div>
   );
 };

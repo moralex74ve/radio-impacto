@@ -1,7 +1,7 @@
-const CACHE_NAME = 'impacto-digital-cache-v4';
+const CACHE_NAME = 'impacto-digital-cache-v5';
 const urlsToCache = [
-  '/',
-  '/index.html'
+  '/radio-impacto/',
+  '/radio-impacto/index.html'
 ];
 
 self.addEventListener('install', event => {

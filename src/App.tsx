@@ -8,11 +8,6 @@ import { VolumeIcon } from "./components/VolumeIcon";
 import { InstallButton } from "./components/InstallButton";
 import { SocialIcons } from "./components/SocialIcons";
 
-/* const STREAM_URL = "https://node-17.zeno.fm/9hfny901wwzuv";
-// Zeno.fm metadata API endpoint
-const METADATA_URL =
-  "https://stream.zeno.fm/api/v2/public/nowplaying/9hfny901wwzuv"; */
-
 const PRIMARY_STREAM_URL = "https://control.voztream.com/8126/stream";
 const BACKUP_STREAM_URL = "https://stream.zeno.fm/9hfny901wwzuv";
 // Voztream metadata API endpoint
@@ -219,81 +214,89 @@ const App: React.FC = () => {
           "linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent, rgba(0, 0, 0, 0.7)), url('https://i.imgur.com/E93AJqd.jpeg')",
       }}
     >
-      <img
-        src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
-        alt="Impacto Digital Logo"
-        className="block w-72 md:w-80 h-40 md:h-44 mb-0 p-0 object-cover"
-      />
-
-      <button
-        onClick={togglePlayPause}
-        className="w-24 h-24 bg-black/40 rounded-full flex items-center justify-center mb-2 transition-transform duration-200 active:scale-95 overflow-hidden"
-        aria-label={
-          streamStatus === StreamStatus.Playing ? "Pausar" : "Reproducir"
-        }
-      >
-        {renderStatusIcon()}
-      </button>
-
-      <div className="flex flex-col items-center my-6 space-y-4">
-        <p className="text-sm tracking-widest text-white/80 h-4">
-          {getStatusText()}
-        </p>
-        <p className="text-white text-lg h-6">{nowPlaying}</p>
-      </div>
-
-      <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
-        <VolumeIcon className="w-6 h-6 text-amber-400" />
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={handleVolumeChange}
-          className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
-          aria-label="Control de volumen"
+      <header className="flex flex-col items-center">
+        <img
+          src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
+          alt="Impacto Digital Radio - La Radio del Pueblo de Dios - Logo oficial"
+          className="block w-72 md:w-80 h-40 md:h-44 mb-0 p-0 object-cover"
         />
-      </div>
-      
-      {/* Iconos de redes sociales */}
-      <div className="mt-1 ">
-        <SocialIcons />
-      </div>
+      </header>
 
-      <div className="mt-3 pt-6 w-full flex items-center justify-center">
-        <span className="inline-block bg-gradient-to-r from-red-600 to-red-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md tracking-wide text-center max-w-xs">
-          La Radio del Pueblo de Dios
-          <span className="block text-xs font-semibold opacity-90">
-            Renovando Tu Vida.
-          </span>
-        </span>
-      </div>
-      {/* WhatsApp button aligned to the right */}
-      <div className="w-full flex justify-end mt-4">
-        <a
-          href="https://wa.me/584267793042"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-3 py-2 pt-2 rounded-full shadow-md transition"
-          aria-label="Contactar por WhatsApp"
+      <main className="flex flex-col items-center w-full">
+        <button
+          onClick={togglePlayPause}
+          className="w-24 h-24 bg-black/40 rounded-full flex items-center justify-center mb-2 transition-transform duration-200 active:scale-95 overflow-hidden"
+          aria-label={
+            streamStatus === StreamStatus.Playing ? "Pausar transmisión de radio" : "Reproducir transmisión de radio en vivo"
+          }
         >
-          <svg
-            className="w-5 h-5 mr-2"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden
+          {renderStatusIcon()}
+        </button>
+
+        <div className="flex flex-col items-center my-6 space-y-4">
+          <p className="text-sm tracking-widest text-white/80 h-4" role="status" aria-live="polite">
+            {getStatusText()}
+          </p>
+          <p className="text-white text-lg h-6" role="status" aria-live="polite" aria-label="Canción actual">{nowPlaying}</p>
+        </div>
+
+        <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
+          <VolumeIcon className="w-6 h-6 text-amber-400" aria-hidden="true" />
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={handleVolumeChange}
+            className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
+            aria-label="Control de volumen de la transmisión"
+          />
+        </div>
+        
+        {/* Iconos de redes sociales */}
+        <nav aria-label="Redes sociales">
+          <div className="mt-1 ">
+            <SocialIcons />
+          </div>
+        </nav>
+      </main>
+
+      <footer className="flex flex-col items-center w-full">
+        <div className="mt-3 pt-6 w-full flex items-center justify-center">
+          <span className="inline-block bg-gradient-to-r from-red-600 to-red-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md tracking-wide text-center max-w-xs">
+            La Radio del Pueblo de Dios
+            <span className="block text-xs font-semibold opacity-90">
+              Renovando Tu Vida.
+            </span>
+          </span>
+        </div>
+        {/* WhatsApp button aligned to the right */}
+        <div className="w-full flex justify-end mt-4">
+          <a
+            href="https://wa.me/584267793042"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-3 py-2 pt-2 rounded-full shadow-md transition"
+            aria-label="Contactar por WhatsApp al +58 426 779 3042"
           >
-            <path d="M20.52 3.48A11.93 11.93 0 0012 0C5.373 0 .01 5.373 0 12c0 2.116.55 4.142 1.6 5.95L0 24l6.264-1.627A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12 0-3.204-1.248-6.206-3.48-8.52zM12 22.08c-1.9 0-3.74-.5-5.36-1.44l-.38-.23-3.72.97.99-3.62-.24-.37A9.07 9.07 0 013 11.99c0-5 4.01-9.01 9-9.01 2.41 0 4.68.94 6.39 2.66A8.99 8.99 0 0121 11.99c0 4.97-4.03 9-9 9.01z" />
-            <path d="M17.3 14.07c-.28-.14-1.65-.81-1.9-.9-.26-.09-.45-.14-.64.14-.2.28-.78.9-.96 1.08-.18.18-.36.2-.64.07-.28-.14-1.18-.43-2.25-1.39-.83-.74-1.39-1.66-1.55-1.94-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.47.14-.16.19-.28.28-.46.09-.18.05-.35-.02-.49-.07-.14-.64-1.54-.88-2.12-.23-.56-.47-.48-.64-.49l-.55-.01c-.18 0-.47.07-.72.34-.25.28-.96.94-.96 2.3 0 1.36.98 2.68 1.12 2.86.14.18 1.94 3 4.7 4.2 2.76 1.2 2.76.8 3.26.75.5-.05 1.65-.67 1.88-1.32.23-.65.23-1.2.16-1.32-.07-.12-.26-.18-.54-.32z" />
-          </svg>
-          <span className="text-sm font-medium">Contactar</span>
-        </a>
-      </div>
-      
-      {/* Botón de instalación para PWA */}
-      <InstallButton />
+            <svg
+              className="w-5 h-5 mr-2"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path d="M20.52 3.48A11.93 11.93 0 0012 0C5.373 0 .01 5.373 0 12c0 2.116.55 4.142 1.6 5.95L0 24l6.264-1.627A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12 0-3.204-1.248-6.206-3.48-8.52zM12 22.08c-1.9 0-3.74-.5-5.36-1.44l-.38-.23-3.72.97.99-3.62-.24-.37A9.07 9.07 0 013 11.99c0-5 4.01-9.01 9-9.01 2.41 0 4.68.94 6.39 2.66A8.99 8.99 0 0121 11.99c0 4.97-4.03 9-9 9.01z" />
+              <path d="M17.3 14.07c-.28-.14-1.65-.81-1.9-.9-.26-.09-.45-.14-.64.14-.2.28-.78.9-.96 1.08-.18.18-.36.2-.64.07-.28-.14-1.18-.43-2.25-1.39-.83-.74-1.39-1.66-1.55-1.94-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.47.14-.16.19-.28.28-.46.09-.18.05-.35-.02-.49-.07-.14-.64-1.54-.88-2.12-.23-.56-.47-.48-.64-.49l-.55-.01c-.18 0-.47.07-.72.34-.25.28-.96.94-.96 2.3 0 1.36.98 2.68 1.12 2.86.14.18 1.94 3 4.7 4.2 2.76 1.2 2.76.8 3.26.75.5-.05 1.65-.67 1.88-1.32.23-.65.23-1.2.16-1.32-.07-.12-.26-.18-.54-.32z" />
+            </svg>
+            <span className="text-sm font-medium">Contactar</span>
+          </a>
+        </div>
+        
+        {/* Botón de instalación para PWA */}
+        <InstallButton />
+      </footer>
     </div>
   );
 };
