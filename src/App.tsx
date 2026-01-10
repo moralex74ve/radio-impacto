@@ -194,7 +194,7 @@ const App: React.FC = () => {
       case StreamStatus.Playing:
         return <PauseIcon className="w-10 h-10 text-amber-400" />;
       case StreamStatus.Paused:
-        return <PlayIcon className="w-10 h-10 text-amber-400" />;
+        return <PlayIcon className="w-10 h-10 text-amber-400 pl-1" />;
       case StreamStatus.Loading:
         return (
           <SpinnerIcon className="w-10 h-10 text-amber-400 animate-spin" />
@@ -208,10 +208,9 @@ const App: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col items-center justify-start pt-4 text-center min-h-screen bg-gray-900 text-white font-sans overflow-hidden bg-cover bg-center p-4"
+      className="flex flex-col items-center justify-start pt-4 text-center min-h-screen bg-gray-900 text-white font-sans overflow-hidden bg-no-repeat bg-cover bg-center bg-fixed p-4"
       style={{
-        backgroundImage:
-          "linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent, rgba(0, 0, 0, 0.7)), url('https://i.imgur.com/E93AJqd.jpeg')",
+        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent, rgba(0, 0, 0, 0.7)), url(${(import.meta as any).env.BASE_URL}Imgur.webp)`,
       }}
     >
       <header className="flex flex-col items-center">
@@ -233,7 +232,7 @@ const App: React.FC = () => {
           </ul>
         </nav>
 
-        <section id="player" aria-labelledby="player-heading">
+        <section id="player" aria-labelledby="player-heading" className="flex flex-col items-center">
           <h2 id="player-heading" className="sr-only">Reproductor de radio en vivo</h2>
           <button
             onClick={togglePlayPause}
