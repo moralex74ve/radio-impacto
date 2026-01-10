@@ -215,6 +215,7 @@ const App: React.FC = () => {
       }}
     >
       <header className="flex flex-col items-center">
+        <h1 className="sr-only">Impacto Digital Radio - La Radio del Pueblo de Dios - Transmisión en vivo 24/7</h1>
         <img
           src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
           alt="Impacto Digital Radio - La Radio del Pueblo de Dios - Logo oficial"
@@ -223,39 +224,55 @@ const App: React.FC = () => {
       </header>
 
       <main className="flex flex-col items-center w-full">
-        <button
-          onClick={togglePlayPause}
-          className="w-24 h-24 bg-black/40 rounded-full flex items-center justify-center mb-2 transition-transform duration-200 active:scale-95 overflow-hidden"
-          aria-label={
-            streamStatus === StreamStatus.Playing ? "Pausar transmisión de radio" : "Reproducir transmisión de radio en vivo"
-          }
-        >
-          {renderStatusIcon()}
-        </button>
+        <nav aria-label="Navegación principal" className="sr-only">
+          <ul className="flex flex-wrap justify-center gap-4 text-sm">
+            <li><a href="#player" className="hover:text-amber-400 transition"> Reproductor</a></li>
+            <li><a href="#volume" className="hover:text-amber-400 transition"> Volumen</a></li>
+            <li><a href="#social" className="hover:text-amber-400 transition"> Redes Sociales</a></li>
+            <li><a href="#contact" className="hover:text-amber-400 transition"> Contacto</a></li>
+          </ul>
+        </nav>
 
-        <div className="flex flex-col items-center my-6 space-y-4">
-          <p className="text-sm tracking-widest text-white/80 h-4" role="status" aria-live="polite">
-            {getStatusText()}
-          </p>
-          <p className="text-white text-lg h-6" role="status" aria-live="polite" aria-label="Canción actual">{nowPlaying}</p>
-        </div>
+        <section id="player" aria-labelledby="player-heading">
+          <h2 id="player-heading" className="sr-only">Reproductor de radio en vivo</h2>
+          <button
+            onClick={togglePlayPause}
+            className="w-24 h-24 bg-black/40 rounded-full flex items-center justify-center mb-2 transition-transform duration-200 active:scale-95 overflow-hidden"
+            aria-label={
+              streamStatus === StreamStatus.Playing ? "Pausar transmisión de radio" : "Reproducir transmisión de radio en vivo"
+            }
+          >
+            {renderStatusIcon()}
+          </button>
 
-        <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
-          <VolumeIcon className="w-6 h-6 text-amber-400" aria-hidden="true" />
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={handleVolumeChange}
-            className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
-            aria-label="Control de volumen de la transmisión"
-          />
-        </div>
+          <div className="flex flex-col items-center my-6 space-y-4">
+            <p className="text-sm tracking-widest text-white/80 h-4" role="status" aria-live="polite">
+              {getStatusText()}
+            </p>
+            <p className="text-white text-lg h-6" role="status" aria-live="polite" aria-label="Canción actual">{nowPlaying}</p>
+          </div>
+        </section>
+        
+        <section id="volume" aria-labelledby="volume-heading">
+          <h2 id="volume-heading" className="sr-only">Control de volumen</h2>
+          <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
+            <VolumeIcon className="w-6 h-6 text-amber-400" aria-hidden="true" />
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
+              aria-label="Control de volumen de la transmisión"
+            />
+          </div>
+        </section>
         
         {/* Iconos de redes sociales */}
-        <nav aria-label="Redes sociales">
+        <nav id="social" aria-label="Redes sociales">
+          <h2 className="sr-only">Síguenos en redes sociales</h2>
           <div className="mt-1 ">
             <SocialIcons />
           </div>
@@ -272,7 +289,7 @@ const App: React.FC = () => {
           </span>
         </div>
         {/* WhatsApp button aligned to the right */}
-        <div className="w-full flex justify-end mt-4">
+        <div id="contact" className="w-full flex justify-end mt-4">
           <a
             href="https://wa.me/584267793042"
             target="_blank"
