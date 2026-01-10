@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Sitemap (descomentar cuando tengas un sitemap)
-# Sitemap: https://moralex74ve.github.io/radio-impacto/sitemap.xml
+Sitemap: https://moralex74ve.github.io/radio-impacto/sitemap.xml
