@@ -20,7 +20,10 @@ const App: React.FC = () => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Paused
   );
-  const [volume, setVolume] = useState(0.4);
+  const [volume, setVolume] = useState(() => {
+    const savedVolume = localStorage.getItem("radio-volume");
+    return savedVolume ? parseFloat(savedVolume) : 0.4;
+  });
   const [nowPlaying, setNowPlaying] = useState<string>("Impacto Digital");
   const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -97,6 +100,7 @@ const App: React.FC = () => {
     const handlePause = () => setStreamStatus(StreamStatus.Paused);
     const handleEnded = () => setStreamStatus(StreamStatus.Offline);
 
+    audio.volume = volume; // Aplicar volumen guardado inicialmente
     audio.addEventListener("canplay", handleCanPlay);
     audio.addEventListener("playing", handlePlaying);
     audio.addEventListener("error", handleError);
@@ -112,7 +116,8 @@ const App: React.FC = () => {
       audio.pause();
       audioRef.current = null;
     };
-  }, []);
+  }, []); // El array vacío es correcto porque volume solo se usa al inicio.
+  // Sin embargo, handleVolumeChange se encarga de las actualizaciones posteriores.
 
   // Revisa periódicamente si el stream principal está disponible cuando
   // se está usando la URL de respaldo.
@@ -190,6 +195,7 @@ const App: React.FC = () => {
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(event.target.value);
     setVolume(newVolume);
+    localStorage.setItem("radio-volume", newVolume.toString());
     if (audioRef.current) {
       audioRef.current.volume = newVolume;
     }
