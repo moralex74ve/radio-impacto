@@ -7,6 +7,8 @@ import { OfflineIcon } from "./components/OfflineIcon";
 import { VolumeIcon } from "./components/VolumeIcon";
 import { InstallButton } from "./components/InstallButton";
 import { SocialIcons } from "./components/SocialIcons";
+import { PrivacyPolicy } from "./components/PrivacyPolicy";
+
 
 const PRIMARY_STREAM_URL = "https://control.voztream.com/8126/stream";
 const BACKUP_STREAM_URL = "https://stream.zeno.fm/9hfny901wwzuv";
@@ -20,7 +22,9 @@ const App: React.FC = () => {
   );
   const [volume, setVolume] = useState(0.4);
   const [nowPlaying, setNowPlaying] = useState<string>("Impacto Digital");
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const isUsingBackupRef = useRef(false);
 
   const fetchMetadata = useCallback(async () => {
@@ -31,9 +35,9 @@ const App: React.FC = () => {
         setNowPlaying("Impacto Digital");
         return;
       }
-      
+
       const data = await response.json();
-      
+
       // Verificamos la estructura de la respuesta de Voztream
       if (data?.song) {
         // Si hay información de la canción en la respuesta
@@ -149,6 +153,23 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Verificar hash para política de privacidad
+  useEffect(() => {
+    if (window.location.hash === "#privacy") {
+      setShowPrivacy(true);
+    }
+
+    const handleHashChange = () => {
+      if (window.location.hash === "#privacy") {
+        setShowPrivacy(true);
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+
   const togglePlayPause = useCallback(() => {
     if (!audioRef.current) return;
 
@@ -251,7 +272,7 @@ const App: React.FC = () => {
             <p className="text-white text-lg h-6" role="status" aria-live="polite" aria-label="Canción actual">{nowPlaying}</p>
           </div>
         </section>
-        
+
         <section id="volume" aria-labelledby="volume-heading">
           <h2 id="volume-heading" className="sr-only">Control de volumen</h2>
           <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
@@ -268,7 +289,7 @@ const App: React.FC = () => {
             />
           </div>
         </section>
-        
+
         {/* Iconos de redes sociales */}
         <nav id="social" aria-label="Redes sociales">
           <h2 className="sr-only">Síguenos en redes sociales</h2>
@@ -309,11 +330,28 @@ const App: React.FC = () => {
             <span className="text-sm font-medium">Escríbenos</span>
           </a>
         </div>
-        
+
         {/* Botón de instalación para PWA */}
         <InstallButton />
+
+        <div className="mt-6 mb-4">
+          <button
+            onClick={() => setShowPrivacy(true)}
+            className="text-xs text-white/40 hover:text-white/80 transition-colors underline bg-transparent border-none cursor-pointer"
+          >
+            Política de Privacidad
+          </button>
+        </div>
       </footer>
+
+      {showPrivacy && <PrivacyPolicy onClose={() => {
+        setShowPrivacy(false);
+        if (window.location.hash === "#privacy") {
+          window.history.pushState("", document.title, window.location.pathname + window.location.search);
+        }
+      }} />}
     </div>
+
   );
 };
 
