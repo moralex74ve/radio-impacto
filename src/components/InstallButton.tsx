@@ -1,7 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, MouseEvent } from 'react';
+
+// Interfaz para el evento de instalación de PWA
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
 
 export const InstallButton = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -24,7 +34,7 @@ export const InstallButton = () => {
       // Previene que el navegador muestre el mensaje de instalación automática
       e.preventDefault();
       // Guarda el evento para que se pueda activar más tarde
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
 
       // Solo mostramos si no ha sido descartado en esta sesión
       if (!sessionStorage.getItem('pwa-dismissed')) {
@@ -52,23 +62,27 @@ export const InstallButton = () => {
     if (!deferredPrompt) return;
 
     // Muestra el mensaje de instalación
-    deferredPrompt.prompt();
+    try {
+      await deferredPrompt.prompt();
 
-    // Espera a que el usuario responda al mensaje
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
+      // Espera a que el usuario responda al mensaje
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
 
-    if (outcome === 'accepted') {
-      localStorage.setItem('pwa-installed', 'true');
+      if (outcome === 'accepted') {
+        localStorage.setItem('pwa-installed', 'true');
+      }
+
+      // Limpia el evento guardado
+      setDeferredPrompt(null);
+      // Oculta el botón
+      setIsVisible(false);
+    } catch (error) {
+      console.error('Error al intentar instalar:', error);
     }
-
-    // Limpia el evento guardado
-    setDeferredPrompt(null);
-    // Oculta el botón
-    setIsVisible(false);
   };
 
-  const handleDismiss = (e: React.MouseEvent) => {
+  const handleDismiss = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation(); // Evita que el clic llegue al botón de instalar si está superpuesto
     setIsVisible(false);
     setIsDismissed(true);
