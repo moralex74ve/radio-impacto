@@ -1,18 +1,13 @@
-const CACHE_NAME = 'impacto-digital-radio-v2';
+const CACHE_NAME = 'radio-impacto-digital-v1';
 const BASE_PATH = '/radio-impacto/';
+
 const urlsToCache = [
   BASE_PATH,
   `${BASE_PATH}index.html`,
-  `${BASE_PATH}index.css`,
-  `${BASE_PATH}index.js`,
   `${BASE_PATH}manifest.json`,
   `${BASE_PATH}icon-192.png`,
   `${BASE_PATH}icon-512.png`,
-  `${BASE_PATH}favicon.ico`,
-  'https://cdn.tailwindcss.com',
-  'https://aistudiocdn.com/react-dom@^19.2.0/',
-  'https://aistudiocdn.com/react@^19.2.0/',
-  'https://aistudiocdn.com/@google/genai@^1.29.0'
+  `${BASE_PATH}Logo.svg`
 ];
 
 // Instalación del Service Worker
@@ -20,10 +15,20 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Cache abierto');
-        return cache.addAll(urlsToCache);
+        console.log('Cache opened');
+        // Usamos un enfoque más robusto: intentar añadir cada uno individualmente
+        // para que si uno falla, los demás se guarden
+        return Promise.allSettled(
+          urlsToCache.map(url => cache.add(url))
+        ).then(results => {
+          const failed = results.filter(r => r.status === 'rejected');
+          if (failed.length > 0) {
+            console.warn('Some assets failed to cache:', failed);
+          }
+        });
       })
   );
+  self.skipWaiting();
 });
 
 // Intercepta las peticiones
@@ -31,7 +36,6 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Devuelve la respuesta en caché si existe, de lo contrario, haz la petición
         return response || fetch(event.request);
       })
   );
@@ -51,4 +55,5 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  self.clients.claim();
 });
