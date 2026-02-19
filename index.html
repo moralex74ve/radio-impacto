@@ -99,7 +99,7 @@
     // Registrar el Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/radio-impacto/sw.js')
+        navigator.serviceWorker.register('/radio-impacto/sw.js?v=3')
           .then(registration => {
             console.log('ServiceWorker registrado con éxito:', registration.scope);
           })
