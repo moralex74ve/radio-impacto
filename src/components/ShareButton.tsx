@@ -4,8 +4,8 @@ export const ShareButton: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
 
   const shareUrl = 'https://moralex74ve.github.io/radio-impacto/';
-  const shareTitle = 'Impacto Digital Radio - La Radio del Pueblo de Dios';
-  const shareText = '¡Escucha Impacto Digital Radio en vivo! 📻✨';
+  const shareTitle = 'Radio Impacto Digital - La Radio del Pueblo de Dios';
+  const shareText = '¡Escucha Radio Impacto Digital en vivo! 📻✨';
 
   const shareLinks = {
     whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
@@ -37,7 +37,7 @@ export const ShareButton: React.FC = () => {
       <button
         onClick={handleNativeShare}
         className="group transition-transform duration-200 hover:scale-110"
-        aria-label="Compartir Impacto Digital Radio"
+        aria-label="Compartir Radio Impacto Digital"
       >
         <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center shadow-md">
           <svg

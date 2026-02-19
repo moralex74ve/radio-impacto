@@ -1,4 +1,4 @@
-# AGENTS.md - Impacto Digital Radio
+# AGENTS.md - Radio Impacto Digital
 
 ## Build Commands
 
@@ -69,7 +69,7 @@ import { SocialIcons } from "./components/SocialIcons";
 ### Error Handling
 - Wrap async operations in try/catch blocks
 - Log errors with `console.error` including context
-- Set fallback/default state on error (e.g., `setNowPlaying("Impacto Digital")`)
+- Set fallback/default state on error (e.g., `setNowPlaying("Radio Impacto Digital")`)
 - Handle promise rejections from `.play()` and `.fetch()` calls
 
 ### Tailwind CSS

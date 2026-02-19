@@ -10,7 +10,7 @@ export const SocialIcons = () => {
         target="_blank"
         rel="noopener noreferrer"
         className="group transition-transform duration-200 hover:scale-110"
-        aria-label="Facebook de Impacto Digital FM"
+        aria-label="Facebook de Radio Impacto Digital"
       >
         <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center shadow-md">
           <svg
@@ -30,7 +30,7 @@ export const SocialIcons = () => {
         target="_blank"
         rel="noopener noreferrer"
         className="group transition-transform duration-200 hover:scale-110"
-        aria-label="Instagram de Impacto Digital FM"
+        aria-label="Instagram de Radio Impacto Digital"
       >
         <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center shadow-md">
           <svg
@@ -50,7 +50,7 @@ export const SocialIcons = () => {
         target="_blank"
         rel="noopener noreferrer"
         className="group transition-transform duration-200 hover:scale-110"
-        aria-label="Canal de YouTube de Impacto Digital FM"
+        aria-label="Canal de YouTube de Radio Impacto Digital"
       >
         <div className="w-10 h-10 rounded-full bg-[#FF0000] flex items-center justify-center shadow-md">
           <svg

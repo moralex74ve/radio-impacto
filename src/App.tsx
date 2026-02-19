@@ -24,7 +24,7 @@ const App: React.FC = () => {
     const savedVolume = localStorage.getItem("radio-volume");
     return savedVolume ? parseFloat(savedVolume) : 0.4;
   });
-  const [nowPlaying, setNowPlaying] = useState<string>("Impacto Digital");
+  const [nowPlaying, setNowPlaying] = useState<string>("Radio Impacto Digital");
   const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -35,7 +35,7 @@ const App: React.FC = () => {
       const response = await fetch(METADATA_URL);
       if (!response.ok) {
         // Si hay un error en la respuesta, usamos el título por defecto
-        setNowPlaying("Impacto Digital");
+        setNowPlaying("Radio Impacto Digital");
         return;
       }
 
@@ -57,11 +57,11 @@ const App: React.FC = () => {
         setNowPlaying(data.title);
       } else {
         // Si no encontramos la información esperada, mostramos el título por defecto
-        setNowPlaying("Impacto Digital");
+        setNowPlaying("Radio Impacto Digital");
       }
     } catch (error) {
       console.error("Error fetching metadata:", error);
-      setNowPlaying("Impacto Digital");
+      setNowPlaying("Radio Impacto Digital");
     }
   }, []);
 
@@ -241,10 +241,10 @@ const App: React.FC = () => {
       }}
     >
       <header className="flex flex-col items-center">
-        <h1 className="sr-only">Impacto Digital Radio - La Radio del Pueblo de Dios - Transmisión en vivo 24/7</h1>
+        <h1 className="sr-only">Radio Impacto Digital - La Radio del Pueblo de Dios - Transmisión en vivo 24/7</h1>
         <img
           src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
-          alt="Impacto Digital Radio - La Radio del Pueblo de Dios - Logo oficial"
+          alt="Radio Impacto Digital - La Radio del Pueblo de Dios - Logo oficial"
           className="block w-72 md:w-80 h-40 md:h-44 mb-0 p-0 object-cover"
         />
       </header>

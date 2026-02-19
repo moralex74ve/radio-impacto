@@ -23,7 +23,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onClose }) => {
 
                 <div className="space-y-4 text-sm md:text-base leading-relaxed text-gray-300">
                     <p>
-                        <strong>Impacto Digital Radio</strong> valora su privacidad. Esta política describe cómo manejamos la información en nuestra aplicación web.
+                        <strong>Radio Impacto Digital</strong> valora su privacidad. Esta política describe cómo manejamos la información en nuestra aplicación web.
                     </p>
 
                     <section>
