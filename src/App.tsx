@@ -13,7 +13,9 @@ import { PrivacyPolicy } from "./components/PrivacyPolicy";
 const PRIMARY_STREAM_URL = "https://control.voztream.com/8126/stream";
 const BACKUP_STREAM_URL = "https://stream.zeno.fm/9hfny901wwzuv";
 // Voztream metadata API endpoint
-const METADATA_URL = "https://control.voztream.com/cp/get_info.php?p=8126";
+const PRIMARY_METADATA_URL = "https://control.voztream.com/cp/get_info.php?p=8126";
+// Zeno.fm metadata API (SSE endpoint used as polling)
+const BACKUP_METADATA_URL = "https://api.zeno.fm/mounts/metadata/subscribe/9hfny901wwzuv";
 const STREAM_CHECK_INTERVAL = 600000; // 10 minutos
 
 const App: React.FC = () => {
@@ -31,34 +33,70 @@ const App: React.FC = () => {
   const isUsingBackupRef = useRef(false);
 
   const fetchMetadata = useCallback(async () => {
+    const fetchZenoMetadata = async () => {
+      const controller = new AbortController();
+      try {
+        const response = await fetch(BACKUP_METADATA_URL, { signal: controller.signal });
+        setTimeout(() => controller.abort(), 2000);
+        if (!response.ok) return null;
+
+        const reader = response.body?.getReader();
+        if (!reader) return null;
+        try {
+          const { value } = await reader.read();
+          const text = new TextDecoder().decode(value);
+          reader.cancel();
+          const lines = text.split('\n');
+          const dataLine = lines.find(line => line.trim().startsWith('data:'));
+          if (dataLine) {
+            const data = JSON.parse(dataLine.replace(/^data:\s*/, '').trim());
+            return data?.streamTitle || null;
+          }
+        } finally {
+          reader.releaseLock();
+        }
+      } catch (e) {
+        return null;
+      }
+      return null;
+    };
+
     try {
-      const response = await fetch(METADATA_URL);
-      if (!response.ok) {
-        // Si hay un error en la respuesta, usamos el título por defecto
-        setNowPlaying("Radio Impacto Digital");
-        return;
-      }
+      const isBackup = isUsingBackupRef.current;
 
-      const data = await response.json();
-
-      // Verificamos la estructura de la respuesta de Voztream
-      if (data?.song) {
-        // Si hay información de la canción en la respuesta
-        setNowPlaying(data.song);
-      } else if (data?.current_song) {
-        // Otra posible estructura de respuesta
-        setNowPlaying(data.current_song);
-      } else if (data?.now_playing?.song) {
-        // Estructura alternativa que usa Zeno.fm
-        const { title, artist } = data.now_playing.song;
-        setNowPlaying(artist ? `${title} - ${artist}` : title);
-      } else if (data?.title) {
-        // Si la respuesta tiene un campo 'title' directo
-        setNowPlaying(data.title);
+      if (isBackup) {
+        const zenoTitle = await fetchZenoMetadata();
+        if (zenoTitle) {
+          setNowPlaying(zenoTitle);
+          return;
+        }
       } else {
-        // Si no encontramos la información esperada, mostramos el título por defecto
-        setNowPlaying("Radio Impacto Digital");
+        const response = await fetch(PRIMARY_METADATA_URL);
+        if (response.ok) {
+          const data = await response.json();
+
+          // If bitrate is 0, the primary stream is likely down, check backup metadata
+          if (data.bitrate === "0" || data.bitrate === 0) {
+            const zenoTitle = await fetchZenoMetadata();
+            if (zenoTitle) {
+              setNowPlaying(zenoTitle);
+              return;
+            }
+          }
+
+          let songTitle = data.song || data.current_song || data.title;
+          if (!songTitle && data.history && data.history.length > 0) {
+            const rawSong = data.history[0];
+            songTitle = rawSong.replace(/^\d+\.\)\s+/, "").replace(/<br>\s*$/i, "").trim();
+          }
+
+          if (songTitle) {
+            setNowPlaying(songTitle);
+            return;
+          }
+        }
       }
+      setNowPlaying("Radio Impacto Digital");
     } catch (error) {
       console.error("Error fetching metadata:", error);
       setNowPlaying("Radio Impacto Digital");
@@ -66,7 +104,20 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchMetadata();
+    // Initial check to see if we should start with backup metadata
+    const checkInitialStream = async () => {
+      try {
+        const response = await fetch(PRIMARY_STREAM_URL, { method: 'HEAD', mode: 'no-cors' });
+        // With no-cors, we can't see the status, but if it throws an error, it's definitely down
+        isUsingBackupRef.current = false;
+      } catch (e) {
+        isUsingBackupRef.current = true;
+      } finally {
+        fetchMetadata();
+      }
+    };
+
+    checkInitialStream();
     const interval = setInterval(fetchMetadata, 10000); // Poll every 10 seconds
     return () => clearInterval(interval);
   }, [fetchMetadata]);
