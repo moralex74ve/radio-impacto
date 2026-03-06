@@ -27,10 +27,81 @@ const App: React.FC = () => {
     return savedVolume ? parseFloat(savedVolume) : 0.4;
   });
   const [nowPlaying, setNowPlaying] = useState<string>("Radio Impacto Digital");
+  const [coverArt, setCoverArt] = useState<string | null>(null);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const isUsingBackupRef = useRef(false);
+
+  const fetchArtwork = useCallback(async (songTitle: string) => {
+    if (!songTitle || songTitle === "Radio Impacto Digital") {
+      setCoverArt(null);
+      return;
+    }
+
+    let mainArtist = "";
+    let cleanITunesSearch = songTitle;
+    const parts = songTitle.split(' - ');
+
+    if (parts.length >= 2) {
+      const artistPart = parts[0];
+      const titlePart = parts[1];
+      mainArtist = artistPart.split(';')[0].trim();
+      cleanITunesSearch = `${mainArtist} ${titlePart}`;
+    }
+
+    // 1. Intentar obtener la imagen profesional del ARTISTA desde Deezer
+    if (mainArtist) {
+      try {
+        const deezerUrl = `https://api.deezer.com/search/artist?q=${encodeURIComponent(mainArtist)}&limit=1`;
+        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(deezerUrl)}`;
+
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+
+        if (data.data && data.data.length > 0) {
+          const artist = data.data[0];
+          // Verificamos coincidencia básica de nombre para evitar imágenes totalmente erróneas
+          if (artist.name.toLowerCase().includes(mainArtist.toLowerCase()) ||
+            mainArtist.toLowerCase().includes(artist.name.toLowerCase())) {
+            setCoverArt(artist.picture_xl || artist.picture_big);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching artist image from Deezer", e);
+      }
+    }
+
+    // 2. Fallback: Carátula del Álbum desde iTunes (si Deezer falla)
+    const cleanSearch = cleanITunesSearch
+      .replace(/\(En\s+Vivo\)/gi, '')
+      .replace(/\[feat\..*?\]/gi, '')
+      .replace(/\(feat\..*?\)/gi, '')
+      .replace(/;/g, ' ')
+      .trim();
+
+    try {
+      const response = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(cleanSearch)}&media=music&limit=1`
+      );
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        const result = data.results[0];
+        const artworkUrl = result.artworkUrl600 || result.artworkUrl100.replace('100x100', '600x600');
+        setCoverArt(artworkUrl);
+      } else {
+        setCoverArt(null);
+      }
+    } catch (error) {
+      console.error("Error fetching artwork from iTunes:", error);
+      setCoverArt(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchArtwork(nowPlaying);
+  }, [nowPlaying, fetchArtwork]);
 
   const fetchMetadata = useCallback(async () => {
     const fetchZenoMetadata = async () => {
@@ -270,15 +341,15 @@ const App: React.FC = () => {
   const renderStatusIcon = () => {
     switch (streamStatus) {
       case StreamStatus.Playing:
-        return <PauseIcon className="w-10 h-10 text-amber-400" />;
+        return <PauseIcon className="w-10 h-10 text-gray-900" />;
       case StreamStatus.Paused:
-        return <PlayIcon className="w-10 h-10 text-amber-400 pl-1" />;
+        return <PlayIcon className="w-10 h-10 text-gray-900 pl-1" />;
       case StreamStatus.Loading:
         return (
-          <SpinnerIcon className="w-10 h-10 text-amber-400 animate-spin" />
+          <SpinnerIcon className="w-10 h-10 text-gray-900 animate-spin" />
         );
       case StreamStatus.Offline:
-        return <OfflineIcon className="w-10 h-10 text-amber-400" />;
+        return <OfflineIcon className="w-10 h-10 text-gray-900" />;
       default:
         return null;
     }
@@ -312,25 +383,50 @@ const App: React.FC = () => {
 
         <section id="player" aria-labelledby="player-heading" className="flex flex-col items-center">
           <h2 id="player-heading" className="sr-only">Reproductor de radio en vivo</h2>
-          <button
-            onClick={togglePlayPause}
-            className="w-24 h-24 bg-black/40 rounded-full flex items-center justify-center mb-2 transition-transform duration-200 active:scale-95 overflow-hidden"
-            aria-label={
-              streamStatus === StreamStatus.Playing ? "Pausar transmisión de radio" : "Reproducir transmisión de radio en vivo"
-            }
-          >
-            {renderStatusIcon()}
-          </button>
 
           <div className="flex flex-col items-center my-6 space-y-4">
-            <p className="text-sm tracking-widest text-white/80 h-4" role="status" aria-live="polite">
-              {getStatusText()}
-            </p>
-            <p className="text-white text-lg h-6" role="status" aria-live="polite" aria-label="Canción actual">{nowPlaying}</p>
+            <div className="relative group mb-8">
+              <div className="w-56 h-56 md:w-64 md:h-64 rounded-full overflow-hidden shadow-2xl transition-all duration-500 transform group-hover:scale-105 border-4 border-white/10">
+                <img
+                  src={coverArt || `${(import.meta as any).env.BASE_URL}Logo.svg`}
+                  alt={`Carátula de ${nowPlaying}`}
+                  className={`w-full h-full object-cover transition-opacity duration-500 ${!coverArt ? 'p-6 bg-black/40 scale-110 blur-sm brightness-50' : 'opacity-100'}`}
+                />
+                {!coverArt && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <img
+                      src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
+                      className="w-32 h-32 object-contain"
+                      alt="Logo fallback"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Play Button Overlapping the bottom edge */}
+              <button
+                onClick={togglePlayPause}
+                className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-amber-400 rounded-full flex items-center justify-center shadow-2xl transition-all duration-200 active:scale-90 hover:scale-110 z-10 hover:shadow-amber-400/20"
+                aria-label={
+                  streamStatus === StreamStatus.Playing ? "Pausar transmisión de radio" : "Reproducir transmisión de radio en vivo"
+                }
+              >
+                {renderStatusIcon()}
+              </button>
+            </div>
+
+            <div className="pt-6 flex flex-col items-center">
+              <p className="text-sm font-bold tracking-widest text-amber-400 h-4 mt-4 uppercase" role="status" aria-live="polite">
+                {getStatusText()}
+              </p>
+              <p className="text-white text-xl md:text-3xl font-bold h-auto max-w-sm mt-2 leading-tight" role="status" aria-live="polite" aria-label="Canción actual">
+                {nowPlaying}
+              </p>
+            </div>
           </div>
         </section>
 
-        <section id="volume" aria-labelledby="volume-heading">
+        <section id="volume" aria-labelledby="volume-heading" className="w-full flex justify-center">
           <h2 id="volume-heading" className="sr-only">Control de volumen</h2>
           <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
             <VolumeIcon className="w-6 h-6 text-amber-400" aria-hidden="true" />
