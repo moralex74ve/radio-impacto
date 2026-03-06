@@ -35,28 +35,58 @@ const App: React.FC = () => {
   const fetchMetadata = useCallback(async () => {
     const fetchZenoMetadata = async () => {
       const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       try {
         const response = await fetch(BACKUP_METADATA_URL, { signal: controller.signal });
-        setTimeout(() => controller.abort(), 2000);
-        if (!response.ok) return null;
+        if (!response.ok) {
+          clearTimeout(timeoutId);
+          return null;
+        }
 
         const reader = response.body?.getReader();
-        if (!reader) return null;
+        if (!reader) {
+          clearTimeout(timeoutId);
+          return null;
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
         try {
-          const { value } = await reader.read();
-          const text = new TextDecoder().decode(value);
-          reader.cancel();
-          const lines = text.split('\n');
-          const dataLine = lines.find(line => line.trim().startsWith('data:'));
-          if (dataLine) {
-            const data = JSON.parse(dataLine.replace(/^data:\s*/, '').trim());
-            return data?.streamTitle || null;
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+
+            for (const line of lines) {
+              if (line.trim().startsWith('data:')) {
+                const jsonStr = line.replace(/^data:\s*/, '').trim();
+                // Avoid empty json objects if Zeno pushes a blank data event
+                if (jsonStr && jsonStr !== '{}') {
+                  try {
+                    const data = JSON.parse(jsonStr);
+                    if (data?.streamTitle) {
+                      clearTimeout(timeoutId);
+                      reader.cancel();
+                      return data.streamTitle;
+                    }
+                  } catch (err) {
+                    // Ignore parse error from partial streaming chunks
+                  }
+                }
+              }
+            }
           }
         } finally {
           reader.releaseLock();
         }
       } catch (e) {
+        // Will catch AbortError if it times out
         return null;
+      } finally {
+        clearTimeout(timeoutId);
       }
       return null;
     };
