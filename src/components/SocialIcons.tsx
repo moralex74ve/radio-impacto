@@ -103,7 +103,7 @@ export const SocialIcons = () => {
         className="group transition-transform duration-200 hover:scale-110"
         aria-label="Descargar aplicación para Android (APK)"
       >
-        <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
           <svg className="w-7 h-7" viewBox="0 0 48 48" aria-hidden="true">
             <path fill="#4285F4" d="M46.105,21.657L11.535,1.751C10.74,1.294,9.757,1.294,8.963,1.751c-1.258,0.725-1.963,2.053-1.963,3.504V42.74 c0,1.451,0.706,2.779,1.963,3.504c0.794,0.457,1.777,0.457,2.571,0.001l34.57-19.904 c1.256-0.723,2-2.052,2-3.502S47.361,22.381,46.105,21.657z" opacity="0.1"/>
             <path fill="#EA4335" d="M10.246,46.17c-0.421,0-0.841-0.111-1.222-0.33c-0.463-0.267-0.814-0.671-0.988-1.139L24.161,28.6l3.961,3.961 L11.468,45.839C11.087,46.06,10.667,46.17,10.246,46.17z"/>
