@@ -2,6 +2,27 @@ import React from 'react';
 import { ShareButton } from './ShareButton';
 
 export const SocialIcons = () => {
+  const handleYouTubeClick = (e: React.MouseEvent) => {
+    // Solo intentar forzar la app en dispositivos móviles
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      e.preventDefault();
+      const channelId = "UCx4MLsOlxBOWSRwIxLAjf9A";
+      const appUrl = `youtube://www.youtube.com/channel/${channelId}`;
+      const webUrl = `https://www.youtube.com/channel/${channelId}`;
+
+      // Intentar abrir la aplicación
+      window.location.href = appUrl;
+
+      // Fallback a la web si la app no se abre después de un momento
+      setTimeout(() => {
+        window.open(webUrl, '_blank');
+      }, 500);
+    }
+    // En escritorio, dejar que el comportamiento por defecto (href + target="_blank") funcione
+  };
+
   return (
     <div className="flex justify-center items-center space-x-4 mt-2">
       {/* Facebook */}
@@ -47,6 +68,7 @@ export const SocialIcons = () => {
       {/* YouTube */}
       <a
         href="https://www.youtube.com/channel/UCx4MLsOlxBOWSRwIxLAjf9A"
+        onClick={handleYouTubeClick}
         target="_blank"
         rel="noopener noreferrer"
         className="group transition-transform duration-200 hover:scale-110"
