@@ -10,9 +10,13 @@ import { SocialIcons } from "./components/SocialIcons";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 
 
-const STREAM_URL = "https://stream.zeno.fm/9hfny901wwzuv";
+const PRIMARY_STREAM_URL = "https://control.voztream.com/8126/stream";
+const BACKUP_STREAM_URL = "https://stream.zeno.fm/9hfny901wwzuv";
+// Voztream metadata API endpoint
+const PRIMARY_METADATA_URL = "https://control.voztream.com/cp/get_info.php?p=8126";
 // Zeno.fm metadata API (SSE endpoint used as polling)
-const METADATA_URL = "https://api.zeno.fm/mounts/metadata/subscribe/9hfny901wwzuv";
+const BACKUP_METADATA_URL = "https://api.zeno.fm/mounts/metadata/subscribe/9hfny901wwzuv";
+const STREAM_CHECK_INTERVAL = 600000; // 10 minutos
 
 const App: React.FC = () => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
@@ -26,78 +30,153 @@ const App: React.FC = () => {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const isUsingBackupRef = useRef(false);
+
   const fetchMetadata = useCallback(async () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-    try {
-      const response = await fetch(METADATA_URL, { signal: controller.signal });
-      if (!response.ok) {
-        setNowPlaying("Radio Impacto Digital");
-        return;
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        setNowPlaying("Radio Impacto Digital");
-        return;
-      }
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-
+    const fetchZenoMetadata = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       try {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
+        const response = await fetch(BACKUP_METADATA_URL, { signal: controller.signal });
+        if (!response.ok) {
+          clearTimeout(timeoutId);
+          return null;
+        }
 
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
+        const reader = response.body?.getReader();
+        if (!reader) {
+          clearTimeout(timeoutId);
+          return null;
+        }
 
-          for (const line of lines) {
-            if (line.trim().startsWith('data:')) {
-              const jsonStr = line.replace(/^data:\s*/, '').trim();
-              // Avoid empty json objects if Zeno pushes a blank data event
-              if (jsonStr && jsonStr !== '{}') {
-                try {
-                  const data = JSON.parse(jsonStr);
-                  if (data?.streamTitle) {
-                    setNowPlaying(data.streamTitle);
-                    reader.cancel();
-                    return;
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+
+            for (const line of lines) {
+              if (line.trim().startsWith('data:')) {
+                const jsonStr = line.replace(/^data:\s*/, '').trim();
+                // Avoid empty json objects if Zeno pushes a blank data event
+                if (jsonStr && jsonStr !== '{}') {
+                  try {
+                    const data = JSON.parse(jsonStr);
+                    if (data?.streamTitle) {
+                      clearTimeout(timeoutId);
+                      reader.cancel();
+                      return data.streamTitle;
+                    }
+                  } catch (err) {
+                    // Ignore parse error from partial streaming chunks
                   }
-                } catch (err) {
-                  // Ignore parse error from partial streaming chunks
                 }
               }
             }
           }
+        } finally {
+          reader.releaseLock();
         }
+      } catch (e) {
+        // Will catch AbortError if it times out
+        return null;
       } finally {
-        reader.releaseLock();
+        clearTimeout(timeoutId);
       }
-    } catch (e) {
-      console.error("Error fetching metadata:", e);
+      return null;
+    };
+
+    try {
+      const isBackup = isUsingBackupRef.current;
+
+      if (isBackup) {
+        const zenoTitle = await fetchZenoMetadata();
+        if (zenoTitle) {
+          setNowPlaying(zenoTitle);
+          return;
+        }
+      } else {
+        const response = await fetch(PRIMARY_METADATA_URL);
+        if (response.ok) {
+          const data = await response.json();
+
+          // If bitrate is 0, the primary stream is likely down, check backup metadata
+          if (data.bitrate === "0" || data.bitrate === 0) {
+            const zenoTitle = await fetchZenoMetadata();
+            if (zenoTitle) {
+              setNowPlaying(zenoTitle);
+              return;
+            }
+          }
+
+          let songTitle = data.song || data.current_song || data.title;
+          if (!songTitle && data.history && data.history.length > 0) {
+            const rawSong = data.history[0];
+            songTitle = rawSong.replace(/^\d+\.\)\s+/, "").replace(/<br>\s*$/i, "").trim();
+          }
+
+          if (songTitle) {
+            setNowPlaying(songTitle);
+            return;
+          }
+        }
+      }
       setNowPlaying("Radio Impacto Digital");
-    } finally {
-      clearTimeout(timeoutId);
+    } catch (error) {
+      console.error("Error fetching metadata:", error);
+      setNowPlaying("Radio Impacto Digital");
     }
   }, []);
 
   useEffect(() => {
-    fetchMetadata();
+    // Initial check to see if we should start with backup metadata
+    const checkInitialStream = async () => {
+      try {
+        const response = await fetch(PRIMARY_STREAM_URL, { method: 'HEAD', mode: 'no-cors' });
+        // With no-cors, we can't see the status, but if it throws an error, it's definitely down
+        isUsingBackupRef.current = false;
+      } catch (e) {
+        isUsingBackupRef.current = true;
+      } finally {
+        fetchMetadata();
+      }
+    };
+
+    checkInitialStream();
     const interval = setInterval(fetchMetadata, 10000); // Poll every 10 seconds
     return () => clearInterval(interval);
   }, [fetchMetadata]);
 
   useEffect(() => {
-    const audio = new Audio(STREAM_URL);
+    const audio = new Audio(PRIMARY_STREAM_URL);
     audio.crossOrigin = "anonymous";
     audioRef.current = audio;
 
     const handleCanPlay = () => setStreamStatus(StreamStatus.Paused);
     const handlePlaying = () => setStreamStatus(StreamStatus.Playing);
     const handleError = () => {
-      setStreamStatus(StreamStatus.Offline);
+      if (!audioRef.current) return;
+
+      if (!isUsingBackupRef.current) {
+        isUsingBackupRef.current = true;
+        audioRef.current.src = BACKUP_STREAM_URL;
+        audioRef.current.load();
+        audioRef.current
+          .play()
+          .then(() => {
+            setStreamStatus(StreamStatus.Playing);
+          })
+          .catch(() => {
+            setStreamStatus(StreamStatus.Offline);
+          });
+      } else {
+        setStreamStatus(StreamStatus.Offline);
+      }
     };
     const handlePause = () => setStreamStatus(StreamStatus.Paused);
     const handleEnded = () => setStreamStatus(StreamStatus.Offline);
@@ -121,7 +200,44 @@ const App: React.FC = () => {
   }, []); // El array vacío es correcto porque volume solo se usa al inicio.
   // Sin embargo, handleVolumeChange se encarga de las actualizaciones posteriores.
 
+  // Revisa periódicamente si el stream principal está disponible cuando
+  // se está usando la URL de respaldo.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!audioRef.current || !isUsingBackupRef.current) return;
 
+      const audio = audioRef.current;
+      const wasPlaying = !audio.paused;
+
+      audio.src = PRIMARY_STREAM_URL;
+      audio.load();
+      audio
+        .play()
+        .then(() => {
+          // Se pudo reproducir la URL principal, dejamos de usar el backup
+          isUsingBackupRef.current = false;
+          setStreamStatus(StreamStatus.Playing);
+        })
+        .catch(() => {
+          // No se pudo reproducir la principal, volvemos al backup
+          audio.src = BACKUP_STREAM_URL;
+          audio.load();
+          if (wasPlaying) {
+            audio
+              .play()
+              .then(() => {
+                setStreamStatus(StreamStatus.Playing);
+              })
+              .catch(() => {
+                setStreamStatus(StreamStatus.Offline);
+              });
+          }
+          isUsingBackupRef.current = true;
+        });
+    }, STREAM_CHECK_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Verificar hash para política de privacidad
   useEffect(() => {
