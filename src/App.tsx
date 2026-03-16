@@ -109,6 +109,20 @@ const App: React.FC = () => {
     audio.addEventListener("pause", handlePause);
     audio.addEventListener("ended", handleEnded);
 
+    // Intentar reproducción automática (reproducción por mejor esfuerzo)
+    // Nota: Muchos navegadores bloquean el autoplay sin interacción previa.
+    const startAutoplay = async () => {
+      try {
+        setStreamStatus(StreamStatus.Loading);
+        await audio.play();
+      } catch (error) {
+        console.log("Autoplay bloqueado por el navegador, se requiere interacción del usuario.");
+        setStreamStatus(StreamStatus.Paused);
+      }
+    };
+
+    startAutoplay();
+
     return () => {
       audio.removeEventListener("canplay", handleCanPlay);
       audio.removeEventListener("playing", handlePlaying);
