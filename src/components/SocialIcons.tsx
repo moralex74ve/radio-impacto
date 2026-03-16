@@ -26,7 +26,7 @@ export const SocialIcons = () => {
 
       {/* Instagram */}
       <a
-        href="https://www.instagram.com/impactodigitalfm/"
+        href="https://www.instagram.com/_u/impactodigitalfm/"
         target="_blank"
         rel="noopener noreferrer"
         className="group transition-transform duration-200 hover:scale-110"
@@ -46,7 +46,7 @@ export const SocialIcons = () => {
 
       {/* YouTube */}
       <a
-        href="https://www.youtube.com/@ImpactoDigitalFM"
+        href="https://www.youtube.com/channel/UCx4MLsOlxBOWSRwIxLAjf9A"
         target="_blank"
         rel="noopener noreferrer"
         className="group transition-transform duration-200 hover:scale-110"
