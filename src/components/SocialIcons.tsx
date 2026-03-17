@@ -16,7 +16,7 @@ export const SocialIcons = () => {
     youtube: {
       web: "https://www.youtube.com/channel/UCx4MLsOlxBOWSRwIxLAjf9A",
       ios: "youtube://www.youtube.com/channel/UCx4MLsOlxBOWSRwIxLAjf9A",
-      android: "intent://www.youtube.com/channel/UCx4MLsOlxBOWSRwIxLAjf9A#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=https%3A%2F%2Fwww.youtube.com%2Fchannel%2FUCx4MLsOlxBOWSRwIxLAjf9A;end"
+      android: "intent://www.youtube.com/channel/UCx4MLsOlxBOWSRwIxLAjf9A/#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=https%3A%2F%2Fwww.youtube.com%2Fchannel%2FUCx4MLsOlxBOWSRwIxLAjf9A;end"
     }
   };
 
@@ -27,8 +27,10 @@ export const SocialIcons = () => {
 
     if (isAndroid) {
       e.preventDefault();
-      // En Android usamos intent con fallback automático, abriendo en nueva pestaña para no cerrar la radio
-      window.open(links[platform].android, '_blank');
+      // En Android usamos intent con fallback automático.
+      // Usamos window.location.href en lugar de window.open porque Brave suele bloquear 
+      // la apertura de protocolos externos en nuevas pestañas por seguridad ( Shields).
+      window.location.href = links[platform].android;
     } else if (isIOS) {
       e.preventDefault();
       const start = Date.now();
