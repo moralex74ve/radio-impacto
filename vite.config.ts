@@ -11,7 +11,7 @@ export default defineConfig(({ command, mode }) => {
   // Definir explícitamente las variables de entorno que queremos exponer
   const envWithProcessPrefix = {
     'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
-    'process.env.BASE_URL': `"${process.env.BASE_URL || '/radio-impacto/'}"`,
+    'process.env.BASE_URL': `"${process.env.BASE_URL || '/'}"`,
     // Agrega aquí otras variables de entorno necesarias
   };
   
@@ -22,7 +22,7 @@ export default defineConfig(({ command, mode }) => {
     },
     plugins: [react(), tailwindcss()], 
     // Configuración base para GitHub Pages
-    base: '/radio-impacto/',
+    base: '/',
     build: {
       outDir: 'dist',
       assetsDir: 'assets',
@@ -36,7 +36,7 @@ export default defineConfig(({ command, mode }) => {
     },
     define: {
       ...envWithProcessPrefix,
-      '__BASE_URL__': JSON.stringify('/radio-impacto/')
+      '__BASE_URL__': JSON.stringify('/')
     },
   };
 });

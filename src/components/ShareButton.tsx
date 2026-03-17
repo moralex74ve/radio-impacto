@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 export const ShareButton: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
 
-  const shareUrl = 'https://moralex74ve.github.io/radio-impacto/';
+  const shareUrl = 'https://impactodigitalfm.com/';
   const shareTitle = 'Radio Impacto Digital - La Radio del Pueblo de Dios';
   const shareText = '¡Escucha Radio Impacto Digital en vivo! 📻✨';
 

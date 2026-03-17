@@ -111,5 +111,5 @@ types.ts                     # Root types (StreamStatus enum)
 
 ### GitHub Pages Deployment
 - Build output: `dist/` folder
-- Homepage URL: https://moralex74ve.github.io/radio-impacto/
+- Homepage URL: https://impactodigitalfm.com/
 - Base URL configured via `import.meta.env.BASE_URL`
