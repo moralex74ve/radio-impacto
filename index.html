@@ -99,7 +99,7 @@
     // Registrar el Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=3')
+        navigator.serviceWorker.register('/sw.js?v=4')
           .then(registration => {
             console.log('ServiceWorker registrado con éxito:', registration.scope);
           })
