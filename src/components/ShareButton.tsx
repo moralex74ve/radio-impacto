@@ -5,7 +5,7 @@ export const ShareButton: React.FC = () => {
 
   const shareUrl = 'https://impactodigitalfm.com/';
   const shareTitle = 'Radio Impacto Digital - La Radio del Pueblo de Dios';
-  const shareText = '📲 ¡Descarga nuestra app! 👉 impactodigitalfm.com/ImpactoDigitalFM.apk\n🎥 Nuestro Canal YouTube: youtube.com/@ImpactoDigitalFM';
+  const shareText = '📲 Descarga nuestra app:\nhttps://impactodigitalfm.com/ImpactoDigitalFM.apk\n\n🎥 Nuestro Canal YouTube:\nhttps://www.youtube.com/@ImpactoDigitalFM';
 
   const shareLinks = {
     whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
