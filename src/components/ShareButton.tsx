@@ -7,13 +7,11 @@ export const ShareButton: React.FC = () => {
   const shareTitle = 'Radio Impacto Digital - La Radio del Pueblo de Dios';
   const shareText = '📻 ¡Escucha Radio Impacto Digital en vivo!';
 
-  const extraLinks = '\n\n📲 Descarga nuestra app:\nhttps://impactodigitalfm.com/ImpactoDigitalFM.apk\n\n🎥 Nuestro Canal YouTube:\nhttps://www.youtube.com/@ImpactoDigitalFM';
-
   const shareLinks = {
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl + extraLinks)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
     twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
-    telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText + extraLinks)}`,
+    telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
   };
 
   const handleNativeShare = async () => {
@@ -21,7 +19,7 @@ export const ShareButton: React.FC = () => {
       try {
         await navigator.share({
           title: shareTitle,
-          text: shareText + extraLinks,
+          text: shareText,
           url: shareUrl,
         });
       } catch (err) {
