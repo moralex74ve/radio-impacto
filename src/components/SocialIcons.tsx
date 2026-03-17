@@ -27,10 +27,15 @@ export const SocialIcons = () => {
 
     if (isAndroid) {
       e.preventDefault();
-      // En Android usamos intent con fallback automático.
-      // Usamos window.location.href en lugar de window.open porque Brave suele bloquear 
-      // la apertura de protocolos externos en nuevas pestañas por seguridad ( Shields).
-      window.location.href = links[platform].android;
+      // Brave en Android tiene problemas con los enlaces 'intent://' directos para YouTube.
+      // Para YouTube usamos la URL web estándar (https), la cual Android redirigirá a la app automáticamente 
+      // si el usuario lo tiene configurado, siendo mucho más compatible con Brave.
+      if (platform === 'youtube') {
+        window.open(links[platform].web, '_blank');
+      } else {
+        // Facebook e Instagram suelen funcionar mejor con intents para forzar la app
+        window.location.href = links[platform].android;
+      }
     } else if (isIOS) {
       e.preventDefault();
       const start = Date.now();
