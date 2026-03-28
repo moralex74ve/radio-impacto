@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { StreamStatus } from "../types";
+import { StreamStatus } from "./types";
 import { PlayIcon } from "./components/PlayIcon";
 import { PauseIcon } from "./components/PauseIcon";
 import { SpinnerIcon } from "./components/SpinnerIcon";
@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [nowPlaying, setNowPlaying] = useState<string>("Radio Impacto Digital");
   const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchMetadata = useCallback(async () => {
     const controller = new AbortController();
@@ -92,50 +93,227 @@ const App: React.FC = () => {
   useEffect(() => {
     const audio = new Audio(STREAM_URL);
     audio.crossOrigin = "anonymous";
+    audio.preload = "none";
     audioRef.current = audio;
 
-    const handleCanPlay = () => setStreamStatus(StreamStatus.Paused);
-    const handlePlaying = () => setStreamStatus(StreamStatus.Playing);
-    const handleError = () => {
+    console.log('[AUDIO] Inicializando Audio element con URL:', STREAM_URL);
+
+    const handleLoadStart = () => {
+      console.log('[AUDIO] Evento: loadstart - Comienza la carga');
+      loadTimeoutRef.current = setTimeout(() => {
+        console.log('[AUDIO] Timeout: Carga inicial demasiado lenta, reintentando...');
+        if (audioRef.current && streamStatus === StreamStatus.Loading) {
+          audioRef.current.src = STREAM_URL;
+          audioRef.current.load();
+        }
+      }, 5000); // 5 segundos timeout
+    };
+
+    const handleProgress = () => {
+      if (audio.buffered.length > 0) {
+        const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+        const duration = audio.duration || 0;
+        if (duration > 0) {
+          console.log(`[AUDIO] Evento: progress - Buffer: ${(bufferedEnd / duration * 100).toFixed(1)}%`);
+          // Si hay suficiente buffer y estamos en Loading, limpiar timeout
+          if (streamStatus === StreamStatus.Loading && bufferedEnd > 5 && loadTimeoutRef.current) {
+            console.log('[AUDIO] Buffer suficiente (>5s), limpiando timeout');
+            clearTimeout(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
+          }
+        }
+      }
+    };
+
+    const handleWaiting = () => {
+      console.log('[AUDIO] Evento: waiting - Buffering... (reproducción pausada por falta de datos)');
+      // Si está waiting durante la carga inicial, establecer timeout para reintento
+      if (streamStatus === StreamStatus.Loading) {
+        if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = setTimeout(() => {
+          if (audioRef.current && streamStatus === StreamStatus.Loading) {
+            console.log('[AUDIO] Waiting timeout: reintentando carga...');
+            audioRef.current.src = STREAM_URL;
+            audioRef.current.load();
+          }
+        }, 3000);
+      }
+    };
+
+    const handleCanPlay = () => {
+      console.log('[AUDIO] Evento: canplay - Puede reproducirse (buffer suficiente)');
+      // Intentar reproducir automáticamente si está en estado Loading
+      if (streamStatus === StreamStatus.Loading && audioRef.current) {
+        audioRef.current.play().catch(() => {
+          // Si falla, mantener el estado y esperar interacción del usuario
+          console.log('[AUDIO] canplay: autoplay fallido, esperando interacción');
+        });
+      }
+    };
+
+    const handleCanPlayThrough = () => {
+      console.log('[AUDIO] Evento: canplaythrough - Puede reproducirse sin interrupciones');
+    };
+
+    const handlePlaying = () => {
+      console.log('[AUDIO] Evento: playing - Reproduciendo');
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      setStreamStatus(StreamStatus.Playing);
+    };
+
+    const handleError = (e: Event) => {
+      console.error('[AUDIO] Evento: error - Error en reproducción:', e);
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      // Si es error durante la carga, reintentar una vez
+      if (streamStatus === StreamStatus.Loading) {
+        console.log('[AUDIO] Error durante carga, reintentando...');
+        audioRef.current.src = STREAM_URL;
+        audioRef.current.load();
+      } else {
+        setStreamStatus(StreamStatus.Offline);
+      }
+    };
+
+    const handlePause = () => {
+      console.log('[AUDIO] Evento: pause - Pausado');
+      // Solo actualizar estado si no estamos en Loading (evita conflictos)
+      setStreamStatus(prev => prev !== StreamStatus.Loading ? StreamStatus.Paused : prev);
+    };
+
+    const handleEnded = () => {
+      console.log('[AUDIO] Evento: ended - Fin del stream');
       setStreamStatus(StreamStatus.Offline);
     };
-    const handlePause = () => setStreamStatus(StreamStatus.Paused);
-    const handleEnded = () => setStreamStatus(StreamStatus.Offline);
 
-    audio.volume = volume; // Aplicar volumen guardado inicialmente
+    const handleStalled = () => {
+      console.log('[AUDIO] Evento: stalled - Flujo de datos detenido');
+      // Si se stallea durante la carga inicial, reintentar
+      if (streamStatus === StreamStatus.Loading) {
+        if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+        if (audioRef.current) {
+          audioRef.current.src = STREAM_URL;
+          audioRef.current.load();
+        }
+      }
+    };
+
+    const handleAbort = () => {
+      console.log('[AUDIO] Evento: abort - Carga abortada');
+      if (streamStatus === StreamStatus.Loading && loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+
+    const handleEmptied = () => {
+      console.log('[AUDIO] Evento: emptied - Buffer vaciado');
+      if (streamStatus === StreamStatus.Loading && loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+
+    const handleSuspend = () => {
+      console.log('[AUDIO] Evento: suspend - Carga suspendida');
+      if (streamStatus === StreamStatus.Loading && loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      console.log('[AUDIO] Evento: loadedmetadata - Metadata cargada');
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
+
+    const handleLoadedData = () => {
+      console.log('[AUDIO] Evento: loadeddata - Datos cargados');
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
+
+    // Aplicar volumen guardado inicialmente
+    audio.volume = volume;
+
+    // Agregar TODOS los event listeners
+    audio.addEventListener("loadstart", handleLoadStart);
+    audio.addEventListener("progress", handleProgress);
+    audio.addEventListener("waiting", handleWaiting);
     audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("canplaythrough", handleCanPlayThrough);
     audio.addEventListener("playing", handlePlaying);
     audio.addEventListener("error", handleError);
     audio.addEventListener("pause", handlePause);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("stalled", handleStalled);
+    audio.addEventListener("abort", handleAbort);
+    audio.addEventListener("emptied", handleEmptied);
+    audio.addEventListener("suspend", handleSuspend);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("loadeddata", handleLoadedData);
 
-    // Intentar reproducción automática (reproducción por mejor esfuerzo)
-    // Nota: Muchos navegadores bloquean el autoplay sin interacción previa.
-    const startAutoplay = async () => {
-      try {
-        setStreamStatus(StreamStatus.Loading);
-        await audio.play();
-      } catch (error) {
-        console.log("Autoplay bloqueado por el navegador, se requiere interacción del usuario.");
-        setStreamStatus(StreamStatus.Paused);
-      }
-    };
-
-    startAutoplay();
+    // NO intentar autoplay aquí - se intentará cuando el usuario haga clic
+    console.log('[AUDIO] Listo para reproducir a la espera de interacción del usuario');
 
     return () => {
+      // Limpiar timeout de carga
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      loadTimeoutRef.current = null;
+      // Limpiar TODOS los event listeners para evitar fugas de memoria
+      audio.removeEventListener("loadstart", handleLoadStart);
+      audio.removeEventListener("progress", handleProgress);
+      audio.removeEventListener("waiting", handleWaiting);
       audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("canplaythrough", handleCanPlayThrough);
       audio.removeEventListener("playing", handlePlaying);
       audio.removeEventListener("error", handleError);
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("stalled", handleStalled);
+      audio.removeEventListener("abort", handleAbort);
+      audio.removeEventListener("emptied", handleEmptied);
+      audio.removeEventListener("suspend", handleSuspend);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("loadeddata", handleLoadedData);
+
       audio.pause();
+      audio.src = "";
+      audio.load();
       audioRef.current = null;
     };
-  }, []); // El array vacío es correcto porque volume solo se usa al inicio.
-  // Sin embargo, handleVolumeChange se encarga de las actualizaciones posteriores.
+  }, []); // Solo ejecutar una vez al montar
 
 
+
+  useEffect(() => {
+    return () => {
+      // Limpiar cualquier timeout pendiente al desmontar el componente
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
+  }, []);
+
+  // Limpiar timeout cuando el estado cambie a Playing o Paused
+  useEffect(() => {
+    if (streamStatus === StreamStatus.Playing || streamStatus === StreamStatus.Paused) {
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      loadTimeoutRef.current = null;
+    }
+  }, [streamStatus]);
+
+  // Manejar visibilidad de la pestaña - reintentar si vuelve a estar activa
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && streamStatus === StreamStatus.Loading) {
+        console.log('[AUDIO] Pestaña visible, verificando estado...');
+        // Si está loading y la pestaña vuelve a estar visible, verificar si el audio está cargado
+        if (audioRef.current && audioRef.current.readyState >= 3) {
+          console.log('[AUDIO] Audio listo, intentando reproducir...');
+          audioRef.current.play().catch(() => {
+            console.log('[AUDIO] Error al reproducir');
+          });
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [streamStatus]);
 
   // Verificar hash para política de privacidad
   useEffect(() => {
@@ -161,12 +339,22 @@ const App: React.FC = () => {
       audioRef.current.pause();
     } else {
       setStreamStatus(StreamStatus.Loading);
-      // If offline, reload the source
-      if (streamStatus === StreamStatus.Offline) {
-        audioRef.current.load();
-      }
+      // Limpiar cualquier timeout pendiente
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      // Recargar el stream para obtener un punto fresco en vivo
+      audioRef.current.src = STREAM_URL;
+      audioRef.current.load();
+      // Establecer timeout para detectar si la reproducción tarda demasiado
+      loadTimeoutRef.current = setTimeout(() => {
+        console.log('[AUDIO] Timeout en play(): reintentando carga...');
+        if (audioRef.current && streamStatus === StreamStatus.Loading) {
+          audioRef.current.src = STREAM_URL;
+          audioRef.current.load();
+        }
+      }, 8000);
       audioRef.current.play().catch(() => {
         setStreamStatus(StreamStatus.Offline);
+        if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
       });
     }
   }, [streamStatus]);
