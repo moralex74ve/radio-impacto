@@ -1,5 +1,38 @@
 # AGENTS.md - Radio Impacto Digital
 
+<!-- CODEGRAPH_START -->
+## CodeGraph
+
+This project has a CodeGraph MCP server (`codegraph_*` tools) configured. CodeGraph is a tree-sitter-parsed knowledge graph of every symbol, edge, and file. Reads are sub-millisecond and return structural information grep cannot.
+
+### When to prefer codegraph over native search
+
+Use codegraph for **structural** questions — what calls what, what would break, where is X defined, what is X's signature. Use native grep/read only for **literal text** queries (string contents, comments, log messages) or after you already have a specific file open.
+
+| Question | Tool |
+|---|---|
+| "Where is X defined?" / "Find symbol named X" | `codegraph_search` |
+| "What calls function Y?" | `codegraph_callers` |
+| "What does Y call?" | `codegraph_callees` |
+| "What would break if I changed Z?" | `codegraph_impact` |
+| "Show me Y's signature / source / docstring" | `codegraph_node` |
+| "Give me focused context for a task/area" | `codegraph_context` |
+| "Survey an unfamiliar module/topic" | `codegraph_explore` |
+| "What files exist under path/" | `codegraph_files` |
+| "Is the index healthy?" | `codegraph_status` |
+
+### Rules of thumb
+
+- **Trust codegraph results.** They come from a full AST parse. Do NOT re-verify them with grep
+- **Don't grep first** when looking up a symbol by name. `codegraph_search` is faster
+- **`codegraph_explore` is the heavy hitter** — returns full source from all relevant files in one call. Spawn an Explore agent for exploration tasks
+- **Index lag**: file watcher debounces ~500ms behind writes
+
+### If `.codegraph/` doesn't exist
+
+The MCP server returns "not initialized." Run `codegraph init -i` to build the index.
+<!-- CODEGRAPH_END -->
+
 ## Build Commands
 
 ```bash
@@ -19,16 +52,16 @@ npm run preview
 npm run predeploy && npm run deploy
 ```
 
-**Note:** Requires `GEMINI_API_KEY` in `.env.local` for full functionality.
-
 ## Project Overview
 
-This is a React 19 + TypeScript + Vite project with Tailwind CSS v4. It's a digital radio station web player with:
-- Audio streaming with primary/backup URLs
-- Real-time metadata fetching
-- PWA support (install button)
-- Social media integration
+This is a **React 19 + TypeScript + Vite** project with **Tailwind CSS v4**. It's a digital radio station web player with:
+- Audio streaming via Zeno.fm with real-time metadata (SSE polling)
+- State management with `StreamStatus` enum (Paused, Playing, Loading, Offline)
+- PWA support with install prompt
+- Social media integration and WhatsApp contact
 - Web Share API support
+- Privacy policy modal
+- Volume persistence via localStorage
 
 ## Code Style Guidelines
 
@@ -99,17 +132,30 @@ import { SocialIcons } from "./components/SocialIcons";
 ### File Structure
 ```
 src/
-  App.tsx                    # Main app component
+  App.tsx                    # Main app component with audio streaming
+  types.ts                   # TypeScript type definitions (StreamStatus enum)
   components/
-    ShareButton.tsx          # Share menu component
-    SocialIcons.tsx          # Social media links
+    PlayIcon.tsx             # Play button SVG icon
+    PauseIcon.tsx            # Pause button SVG icon
+    SpinnerIcon.tsx          # Loading spinner SVG icon
+    OfflineIcon.tsx          # Offline/disconnected SVG icon
+    VolumeIcon.tsx           # Volume control SVG icon
     InstallButton.tsx        # PWA install prompt
-    *Icon.tsx                # SVG icon components
-  types.ts                   # TypeScript type definitions
-types.ts                     # Root types (StreamStatus enum)
+    SocialIcons.tsx          # Social media links
+    ShareButton.tsx          # Web Share API integration
+    PrivacyPolicy.tsx        # Privacy policy modal
+public/
+  manifest.json              # PWA manifest
 ```
 
 ### GitHub Pages Deployment
 - Build output: `dist/` folder
 - Homepage URL: https://impactodigitalfm.com/
 - Base URL configured via `import.meta.env.BASE_URL`
+
+## Key Features
+
+- **Audio**: Zeno.fm streaming with SSE metadata polling (10s interval)
+- **WhatsApp**: Direct contact link `https://wa.me/584267793042`
+- **Privacy**: Modal triggered via `#privacy` hash or button
+- **Volume**: Persisted in localStorage under `radio-volume`

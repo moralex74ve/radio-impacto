@@ -26,6 +26,8 @@ const App: React.FC = () => {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
 
   const fetchMetadata = useCallback(async () => {
     const controller = new AbortController();
@@ -158,19 +160,24 @@ const App: React.FC = () => {
     const handlePlaying = () => {
       console.log('[AUDIO] Evento: playing - Reproduciendo');
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      retryCountRef.current = 0; // Resetear retries al lograr reproducir
       setStreamStatus(StreamStatus.Playing);
     };
 
     const handleError = (e: Event) => {
       console.error('[AUDIO] Evento: error - Error en reproducción:', e);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-      // Si es error durante la carga, reintentar una vez
-      if (streamStatus === StreamStatus.Loading) {
-        console.log('[AUDIO] Error durante carga, reintentando...');
+      // Reintentar en cualquier estado si no excedemos maxRetries
+      if (retryCountRef.current < maxRetries && audioRef.current) {
+        retryCountRef.current++;
+        console.log(`[AUDIO] Error: reintento ${retryCountRef.current}/${maxRetries}`);
+        setStreamStatus(StreamStatus.Loading);
         audioRef.current.src = STREAM_URL;
         audioRef.current.load();
       } else {
+        console.log('[AUDIO] Error: max retries alcanzados');
         setStreamStatus(StreamStatus.Offline);
+        retryCountRef.current = 0;
       }
     };
 
@@ -181,19 +188,36 @@ const App: React.FC = () => {
     };
 
     const handleEnded = () => {
-      console.log('[AUDIO] Evento: ended - Fin del stream');
-      setStreamStatus(StreamStatus.Offline);
+      console.log('[AUDIO] Evento: ended - Fin del stream, reconectando...');
+      // Para streams continuos, intentar reconectar automáticamente
+      if (retryCountRef.current < maxRetries && audioRef.current) {
+        retryCountRef.current++;
+        setStreamStatus(StreamStatus.Loading);
+        audioRef.current.src = STREAM_URL;
+        audioRef.current.load();
+      } else {
+        setStreamStatus(StreamStatus.Offline);
+        retryCountRef.current = 0;
+      }
     };
 
     const handleStalled = () => {
       console.log('[AUDIO] Evento: stalled - Flujo de datos detenido');
-      // Si se stallea durante la carga inicial, reintentar
-      if (streamStatus === StreamStatus.Loading) {
-        if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-        if (audioRef.current) {
-          audioRef.current.src = STREAM_URL;
-          audioRef.current.load();
-        }
+      // Reintentar carga en cualquier estado si no excedemos maxRetries
+      if (retryCountRef.current < maxRetries && audioRef.current) {
+        retryCountRef.current++;
+        console.log(`[AUDIO] Stalled: reintento ${retryCountRef.current}/${maxRetries}`);
+        audioRef.current.src = STREAM_URL;
+        audioRef.current.load();
+        loadTimeoutRef.current = setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.play().catch(() => {});
+          }
+        }, 3000);
+      } else {
+        console.log('[AUDIO] Stalled: max retries alcanzados');
+        setStreamStatus(StreamStatus.Offline);
+        retryCountRef.current = 0;
       }
     };
 
@@ -338,6 +362,7 @@ const App: React.FC = () => {
     if (streamStatus === StreamStatus.Playing) {
       audioRef.current.pause();
     } else {
+      retryCountRef.current = 0; // Resetear retries al iniciar
       setStreamStatus(StreamStatus.Loading);
       // Limpiar cualquier timeout pendiente
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
