@@ -29,6 +29,14 @@ const App: React.FC = () => {
   const retryCountRef = useRef(0);
   const maxRetries = 3;
 
+  // Referencias para evitar clausuras (closures) obsoletas en los manejadores de eventos
+  const reconnectRef = useRef<() => void>(() => {});
+  const streamStatusRef = useRef<StreamStatus>(streamStatus);
+
+  useEffect(() => {
+    streamStatusRef.current = streamStatus;
+  }, [streamStatus]);
+
   const fetchMetadata = useCallback(async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -92,6 +100,80 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [fetchMetadata]);
 
+  const reconnectStream = useCallback(() => {
+    if (!audioRef.current) return;
+    console.log('[AUDIO] Iniciando reconexión del stream...');
+    
+    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+
+    setStreamStatus(StreamStatus.Loading);
+    
+    const currentVolume = audioRef.current.volume;
+    
+    try {
+      audioRef.current.pause();
+      // Asignar una URL limpia para forzar al navegador a desechar la conexión rota y abrir una nueva
+      audioRef.current.src = STREAM_URL;
+      audioRef.current.load();
+      audioRef.current.volume = currentVolume;
+      
+      audioRef.current.play().catch((err) => {
+        console.error('[AUDIO] Error al intentar reproducir durante la reconexión:', err);
+      });
+
+      // Timeout de salvaguarda por si se queda en Loading infinitamente
+      loadTimeoutRef.current = setTimeout(() => {
+        if (audioRef.current && streamStatusRef.current === StreamStatus.Loading) {
+          console.log('[AUDIO] Timeout en reconexión, reintentando de nuevo...');
+          reconnectStream();
+        }
+      }, 8000);
+    } catch (error) {
+      console.error('[AUDIO] Error crítico en reconnectStream:', error);
+    }
+  }, []);
+
+  // Actualizar la referencia mutable en cada render
+  useEffect(() => {
+    reconnectRef.current = reconnectStream;
+  });
+
+  // Monitorear si el audio se queda congelado silenciosamente durante la reproducción
+  useEffect(() => {
+    if (streamStatus !== StreamStatus.Playing) return;
+
+    let lastTime = audioRef.current ? audioRef.current.currentTime : 0;
+    let freezeCount = 0;
+
+    const checkInterval = setInterval(() => {
+      if (!audioRef.current) return;
+
+      const currentTime = audioRef.current.currentTime;
+      const isPaused = audioRef.current.paused;
+
+      if (isPaused) {
+        return; // Ignorar si el usuario lo pausó deliberadamente
+      }
+
+      if (currentTime === lastTime) {
+        freezeCount++;
+        console.warn(`[AUDIO Monitor] Progreso de audio estancado: detección ${freezeCount}/2`);
+        if (freezeCount >= 2) {
+          console.error('[AUDIO Monitor] Stream congelado detectado. Iniciando reconexión automática...');
+          clearInterval(checkInterval);
+          reconnectStream();
+        }
+      } else {
+        freezeCount = 0;
+        lastTime = currentTime;
+      }
+    }, 3000); // Verificar cada 3 segundos
+
+    return () => {
+      clearInterval(checkInterval);
+    };
+  }, [streamStatus, reconnectStream]);
+
   useEffect(() => {
     const audio = new Audio(STREAM_URL);
     audio.crossOrigin = "anonymous";
@@ -129,25 +211,20 @@ const App: React.FC = () => {
 
     const handleWaiting = () => {
       console.log('[AUDIO] Evento: waiting - Buffering... (reproducción pausada por falta de datos)');
-      // Si está waiting durante la carga inicial, establecer timeout para reintento
-      if (streamStatus === StreamStatus.Loading) {
-        if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-        loadTimeoutRef.current = setTimeout(() => {
-          if (audioRef.current && streamStatus === StreamStatus.Loading) {
-            console.log('[AUDIO] Waiting timeout: reintentando carga...');
-            audioRef.current.src = STREAM_URL;
-            audioRef.current.load();
-          }
-        }, 3000);
-      }
+      // Si está waiting durante la carga o reproducción, establecer timeout para reconectar
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      loadTimeoutRef.current = setTimeout(() => {
+        if (audioRef.current && (streamStatusRef.current === StreamStatus.Loading || streamStatusRef.current === StreamStatus.Playing)) {
+          console.log('[AUDIO] Waiting timeout: iniciando reconexión...');
+          reconnectRef.current();
+        }
+      }, 6000); // Esperar 6 segundos
     };
 
     const handleCanPlay = () => {
       console.log('[AUDIO] Evento: canplay - Puede reproducirse (buffer suficiente)');
-      // Intentar reproducir automáticamente si está en estado Loading
-      if (streamStatus === StreamStatus.Loading && audioRef.current) {
+      if (streamStatusRef.current === StreamStatus.Loading && audioRef.current) {
         audioRef.current.play().catch(() => {
-          // Si falla, mantener el estado y esperar interacción del usuario
           console.log('[AUDIO] canplay: autoplay fallido, esperando interacción');
         });
       }
@@ -167,13 +244,10 @@ const App: React.FC = () => {
     const handleError = (e: Event) => {
       console.error('[AUDIO] Evento: error - Error en reproducción:', e);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-      // Reintentar en cualquier estado si no excedemos maxRetries
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
         console.log(`[AUDIO] Error: reintento ${retryCountRef.current}/${maxRetries}`);
-        setStreamStatus(StreamStatus.Loading);
-        audioRef.current.src = STREAM_URL;
-        audioRef.current.load();
+        reconnectRef.current();
       } else {
         console.log('[AUDIO] Error: max retries alcanzados');
         setStreamStatus(StreamStatus.Offline);
@@ -183,18 +257,14 @@ const App: React.FC = () => {
 
     const handlePause = () => {
       console.log('[AUDIO] Evento: pause - Pausado');
-      // Solo actualizar estado si no estamos en Loading (evita conflictos)
       setStreamStatus(prev => prev !== StreamStatus.Loading ? StreamStatus.Paused : prev);
     };
 
     const handleEnded = () => {
       console.log('[AUDIO] Evento: ended - Fin del stream, reconectando...');
-      // Para streams continuos, intentar reconectar automáticamente
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
-        setStreamStatus(StreamStatus.Loading);
-        audioRef.current.src = STREAM_URL;
-        audioRef.current.load();
+        reconnectRef.current();
       } else {
         setStreamStatus(StreamStatus.Offline);
         retryCountRef.current = 0;
@@ -203,17 +273,10 @@ const App: React.FC = () => {
 
     const handleStalled = () => {
       console.log('[AUDIO] Evento: stalled - Flujo de datos detenido');
-      // Reintentar carga en cualquier estado si no excedemos maxRetries
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
         console.log(`[AUDIO] Stalled: reintento ${retryCountRef.current}/${maxRetries}`);
-        audioRef.current.src = STREAM_URL;
-        audioRef.current.load();
-        loadTimeoutRef.current = setTimeout(() => {
-          if (audioRef.current) {
-            audioRef.current.play().catch(() => {});
-          }
-        }, 3000);
+        reconnectRef.current();
       } else {
         console.log('[AUDIO] Stalled: max retries alcanzados');
         setStreamStatus(StreamStatus.Offline);

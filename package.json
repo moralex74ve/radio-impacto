@@ -10,7 +10,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "cg:init": "codegraph init -i",
+    "cg:index": "codegraph index --force",
+    "cg:status": "codegraph status",
+    "cg:sync": "codegraph sync"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
