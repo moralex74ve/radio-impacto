@@ -9,14 +9,14 @@ import { InstallButton } from "./components/InstallButton";
 import { SocialIcons } from "./components/SocialIcons";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 
-
 const STREAM_URL = "https://stream.zeno.fm/9hfny901wwzuv";
 // Zeno.fm metadata API (SSE endpoint used as polling)
-const METADATA_URL = "https://api.zeno.fm/mounts/metadata/subscribe/9hfny901wwzuv";
+const METADATA_URL =
+  "https://api.zeno.fm/mounts/metadata/subscribe/9hfny901wwzuv";
 
 const App: React.FC = () => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Paused
+    StreamStatus.Paused,
   );
   const [volume, setVolume] = useState(() => {
     const savedVolume = localStorage.getItem("radio-volume");
@@ -27,7 +27,7 @@ const App: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const retryCountRef = useRef(0);
-  const maxRetries = 3;
+  const maxRetries = 5;
 
   // Referencias para evitar clausuras (closures) obsoletas en los manejadores de eventos
   const reconnectRef = useRef<() => void>(() => {});
@@ -40,6 +40,7 @@ const App: React.FC = () => {
   const fetchMetadata = useCallback(async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     try {
       const response = await fetch(METADATA_URL, { signal: controller.signal });
       if (!response.ok) {
@@ -54,7 +55,7 @@ const App: React.FC = () => {
       }
 
       const decoder = new TextDecoder();
-      let buffer = '';
+      let buffer = "";
 
       try {
         while (true) {
@@ -62,13 +63,13 @@ const App: React.FC = () => {
           if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
+          const lines = buffer.split("\n");
 
           for (const line of lines) {
-            if (line.trim().startsWith('data:')) {
-              const jsonStr = line.replace(/^data:\s*/, '').trim();
+            if (line.trim().startsWith("data:")) {
+              const jsonStr = line.replace(/^data:\s*/, "").trim();
               // Avoid empty json objects if Zeno pushes a blank data event
-              if (jsonStr && jsonStr !== '{}') {
+              if (jsonStr && jsonStr !== "{}") {
                 try {
                   const data = JSON.parse(jsonStr);
                   if (data?.streamTitle) {
@@ -84,7 +85,11 @@ const App: React.FC = () => {
           }
         }
       } finally {
-        reader.releaseLock();
+        try {
+          reader.releaseLock();
+        } catch {
+          // Reader already released or cancelled
+        }
       }
     } catch (e) {
       console.error("Error fetching metadata:", e);
@@ -100,37 +105,62 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [fetchMetadata]);
 
-  const reconnectStream = useCallback(() => {
+  const reconnectStream = useCallback((delayMs: number = 0) => {
     if (!audioRef.current) return;
-    console.log('[AUDIO] Iniciando reconexión del stream...');
-    
-    if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
 
-    setStreamStatus(StreamStatus.Loading);
-    
-    const currentVolume = audioRef.current.volume;
-    
-    try {
-      audioRef.current.pause();
-      // Asignar una URL limpia para forzar al navegador a desechar la conexión rota y abrir una nueva
-      audioRef.current.src = STREAM_URL;
-      audioRef.current.load();
-      audioRef.current.volume = currentVolume;
-      
-      audioRef.current.play().catch((err) => {
-        console.error('[AUDIO] Error al intentar reproducir durante la reconexión:', err);
-      });
+    const performReconnect = () => {
+      if (!audioRef.current) return;
+      console.log("[AUDIO] Iniciando reconexión del stream...");
 
-      // Timeout de salvaguarda por si se queda en Loading infinitamente
-      loadTimeoutRef.current = setTimeout(() => {
-        if (audioRef.current && streamStatusRef.current === StreamStatus.Loading) {
-          console.log('[AUDIO] Timeout en reconexión, reintentando de nuevo...');
-          reconnectStream();
-        }
-      }, 8000);
-    } catch (error) {
-      console.error('[AUDIO] Error crítico en reconnectStream:', error);
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+
+      setStreamStatus(StreamStatus.Loading);
+
+      const currentVolume = audioRef.current.volume;
+
+      try {
+        audioRef.current.pause();
+        // Asignar una URL limpia para forzar al navegador a desechar la conexión rota y abrir una nueva
+        audioRef.current.src = STREAM_URL;
+        audioRef.current.load();
+        audioRef.current.volume = currentVolume;
+
+        audioRef.current.play().catch((err) => {
+          console.error(
+            "[AUDIO] Error al intentar reproducir durante la reconexión:",
+            err,
+          );
+        });
+
+        // Timeout de salvaguarda con backoff exponencial: 5s, 7.5s, 11.25s, 17s, 25s
+        // Evita martillar el servidor cuando está sobrecargado
+        const backoffMs = Math.min(
+          5000 * Math.pow(1.5, Math.max(0, retryCountRef.current - 1)),
+          30000,
+        );
+        loadTimeoutRef.current = setTimeout(() => {
+          if (
+            audioRef.current &&
+            streamStatusRef.current === StreamStatus.Loading
+          ) {
+            console.log(
+              `[AUDIO] Timeout en reconexión (${backoffMs}ms), reintentando de nuevo...`,
+            );
+            reconnectStream(0);
+          }
+        }, backoffMs);
+      } catch (error) {
+        console.error("[AUDIO] Error crítico en reconnectStream:", error);
+      }
+    };
+
+    if (delayMs > 0) {
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      loadTimeoutRef.current = setTimeout(performReconnect, delayMs);
+      return;
     }
+
+    performReconnect();
   }, []);
 
   // Actualizar la referencia mutable en cada render
@@ -139,27 +169,41 @@ const App: React.FC = () => {
   });
 
   // Monitorear si el audio se queda congelado silenciosamente durante la reproducción
+  // Se activa después de 15s de reproducción y requiere 6s sin progreso para reconectar (~21s total)
   useEffect(() => {
     if (streamStatus !== StreamStatus.Playing) return;
 
     let lastTime = audioRef.current ? audioRef.current.currentTime : 0;
     let freezeCount = 0;
+    let checkStartTime = Date.now();
 
     const checkInterval = setInterval(() => {
       if (!audioRef.current) return;
 
       const currentTime = audioRef.current.currentTime;
       const isPaused = audioRef.current.paused;
+      const elapsedSeconds = (Date.now() - checkStartTime) / 1000;
 
       if (isPaused) {
         return; // Ignorar si el usuario lo pausó deliberadamente
       }
 
+      // Verificar congelamiento después de 15 segundos de reproducción
+      if (elapsedSeconds < 15) {
+        lastTime = currentTime;
+        return;
+      }
+
       if (currentTime === lastTime) {
         freezeCount++;
-        console.warn(`[AUDIO Monitor] Progreso de audio estancado: detección ${freezeCount}/2`);
+        console.warn(
+          `[AUDIO Monitor] Progreso de audio estancado: detección ${freezeCount}/2`,
+        );
+        // Requiere 2 iteraciones consecutivas sin progreso (6 segundos) antes de reconectar
         if (freezeCount >= 2) {
-          console.error('[AUDIO Monitor] Stream congelado detectado. Iniciando reconexión automática...');
+          console.error(
+            "[AUDIO Monitor] Stream congelado detectado por >6 segundos. Iniciando reconexión automática...",
+          );
           clearInterval(checkInterval);
           reconnectStream();
         }
@@ -180,13 +224,18 @@ const App: React.FC = () => {
     audio.preload = "none";
     audioRef.current = audio;
 
-    console.log('[AUDIO] Inicializando Audio element con URL:', STREAM_URL);
+    console.log("[AUDIO] Inicializando Audio element con URL:", STREAM_URL);
 
     const handleLoadStart = () => {
-      console.log('[AUDIO] Evento: loadstart - Comienza la carga');
+      console.log("[AUDIO] Evento: loadstart - Comienza la carga");
       loadTimeoutRef.current = setTimeout(() => {
-        console.log('[AUDIO] Timeout: Carga inicial demasiado lenta, reintentando...');
-        if (audioRef.current && streamStatus === StreamStatus.Loading) {
+        console.log(
+          "[AUDIO] Timeout: Carga inicial demasiado lenta, reintentando...",
+        );
+        if (
+          audioRef.current &&
+          streamStatusRef.current === StreamStatus.Loading
+        ) {
           audioRef.current.src = STREAM_URL;
           audioRef.current.load();
         }
@@ -198,10 +247,16 @@ const App: React.FC = () => {
         const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
         const duration = audio.duration || 0;
         if (duration > 0) {
-          console.log(`[AUDIO] Evento: progress - Buffer: ${(bufferedEnd / duration * 100).toFixed(1)}%`);
+          console.log(
+            `[AUDIO] Evento: progress - Buffer: ${((bufferedEnd / duration) * 100).toFixed(1)}%`,
+          );
           // Si hay suficiente buffer y estamos en Loading, limpiar timeout
-          if (streamStatus === StreamStatus.Loading && bufferedEnd > 5 && loadTimeoutRef.current) {
-            console.log('[AUDIO] Buffer suficiente (>5s), limpiando timeout');
+          if (
+            streamStatusRef.current === StreamStatus.Loading &&
+            bufferedEnd > 5 &&
+            loadTimeoutRef.current
+          ) {
+            console.log("[AUDIO] Buffer suficiente (>5s), limpiando timeout");
             clearTimeout(loadTimeoutRef.current);
             loadTimeoutRef.current = null;
           }
@@ -210,58 +265,81 @@ const App: React.FC = () => {
     };
 
     const handleWaiting = () => {
-      console.log('[AUDIO] Evento: waiting - Buffering... (reproducción pausada por falta de datos)');
-      // Si está waiting durante la carga o reproducción, establecer timeout para reconectar
-      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
-      loadTimeoutRef.current = setTimeout(() => {
-        if (audioRef.current && (streamStatusRef.current === StreamStatus.Loading || streamStatusRef.current === StreamStatus.Playing)) {
-          console.log('[AUDIO] Waiting timeout: iniciando reconexión...');
-          reconnectRef.current();
-        }
-      }, 6000); // Esperar 6 segundos
+      console.log(
+        "[AUDIO] Evento: waiting - Buffering... (reproducción pausada por falta de datos)",
+      );
+      // Solo establecer timeout para reconectar si estamos en fase de carga (Loading)
+      // No reconectar durante reproducción normal, ya que el waiting es esperado
+      if (streamStatusRef.current === StreamStatus.Loading) {
+        if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = setTimeout(() => {
+          if (
+            audioRef.current &&
+            streamStatusRef.current === StreamStatus.Loading
+          ) {
+            console.log(
+              "[AUDIO] Waiting timeout durante carga: iniciando reconexión...",
+            );
+            reconnectRef.current();
+          }
+        }, 6000); // Esperar 6 segundos solo durante carga
+      }
     };
 
     const handleCanPlay = () => {
-      console.log('[AUDIO] Evento: canplay - Puede reproducirse (buffer suficiente)');
-      if (streamStatusRef.current === StreamStatus.Loading && audioRef.current) {
+      console.log(
+        "[AUDIO] Evento: canplay - Puede reproducirse (buffer suficiente)",
+      );
+      if (
+        streamStatusRef.current === StreamStatus.Loading &&
+        audioRef.current
+      ) {
         audioRef.current.play().catch(() => {
-          console.log('[AUDIO] canplay: autoplay fallido, esperando interacción');
+          console.log(
+            "[AUDIO] canplay: autoplay fallido, esperando interacción",
+          );
         });
       }
     };
 
     const handleCanPlayThrough = () => {
-      console.log('[AUDIO] Evento: canplaythrough - Puede reproducirse sin interrupciones');
+      console.log(
+        "[AUDIO] Evento: canplaythrough - Puede reproducirse sin interrupciones",
+      );
     };
 
     const handlePlaying = () => {
-      console.log('[AUDIO] Evento: playing - Reproduciendo');
+      console.log("[AUDIO] Evento: playing - Reproduciendo");
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
       retryCountRef.current = 0; // Resetear retries al lograr reproducir
       setStreamStatus(StreamStatus.Playing);
     };
 
     const handleError = (e: Event) => {
-      console.error('[AUDIO] Evento: error - Error en reproducción:', e);
+      console.error("[AUDIO] Evento: error - Error en reproducción:", e);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
-        console.log(`[AUDIO] Error: reintento ${retryCountRef.current}/${maxRetries}`);
+        console.log(
+          `[AUDIO] Error: reintento ${retryCountRef.current}/${maxRetries}`,
+        );
         reconnectRef.current();
       } else {
-        console.log('[AUDIO] Error: max retries alcanzados');
+        console.log("[AUDIO] Error: max retries alcanzados");
         setStreamStatus(StreamStatus.Offline);
         retryCountRef.current = 0;
       }
     };
 
     const handlePause = () => {
-      console.log('[AUDIO] Evento: pause - Pausado');
-      setStreamStatus(prev => prev !== StreamStatus.Loading ? StreamStatus.Paused : prev);
+      console.log("[AUDIO] Evento: pause - Pausado");
+      setStreamStatus((prev) =>
+        prev !== StreamStatus.Loading ? StreamStatus.Paused : prev,
+      );
     };
 
     const handleEnded = () => {
-      console.log('[AUDIO] Evento: ended - Fin del stream, reconectando...');
+      console.log("[AUDIO] Evento: ended - Fin del stream, reconectando...");
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
         reconnectRef.current();
@@ -272,46 +350,57 @@ const App: React.FC = () => {
     };
 
     const handleStalled = () => {
-      console.log('[AUDIO] Evento: stalled - Flujo de datos detenido');
+      console.log("[AUDIO] Evento: stalled - Flujo de datos detenido");
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
-        console.log(`[AUDIO] Stalled: reintento ${retryCountRef.current}/${maxRetries}`);
+        console.log(
+          `[AUDIO] Stalled: reintento ${retryCountRef.current}/${maxRetries}`,
+        );
         reconnectRef.current();
       } else {
-        console.log('[AUDIO] Stalled: max retries alcanzados');
+        console.log("[AUDIO] Stalled: max retries alcanzados");
         setStreamStatus(StreamStatus.Offline);
         retryCountRef.current = 0;
       }
     };
 
     const handleAbort = () => {
-      console.log('[AUDIO] Evento: abort - Carga abortada');
-      if (streamStatus === StreamStatus.Loading && loadTimeoutRef.current) {
+      console.log("[AUDIO] Evento: abort - Carga abortada");
+      if (
+        streamStatusRef.current === StreamStatus.Loading &&
+        loadTimeoutRef.current
+      ) {
         clearTimeout(loadTimeoutRef.current);
       }
     };
 
     const handleEmptied = () => {
-      console.log('[AUDIO] Evento: emptied - Buffer vaciado');
-      if (streamStatus === StreamStatus.Loading && loadTimeoutRef.current) {
+      console.log("[AUDIO] Evento: emptied - Buffer vaciado");
+      if (
+        streamStatusRef.current === StreamStatus.Loading &&
+        loadTimeoutRef.current
+      ) {
         clearTimeout(loadTimeoutRef.current);
       }
     };
 
     const handleSuspend = () => {
-      console.log('[AUDIO] Evento: suspend - Carga suspendida');
-      if (streamStatus === StreamStatus.Loading && loadTimeoutRef.current) {
+      console.log("[AUDIO] Evento: suspend - Carga suspendida");
+      if (
+        streamStatusRef.current === StreamStatus.Loading &&
+        loadTimeoutRef.current
+      ) {
         clearTimeout(loadTimeoutRef.current);
       }
     };
 
     const handleLoadedMetadata = () => {
-      console.log('[AUDIO] Evento: loadedmetadata - Metadata cargada');
+      console.log("[AUDIO] Evento: loadedmetadata - Metadata cargada");
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
 
     const handleLoadedData = () => {
-      console.log('[AUDIO] Evento: loadeddata - Datos cargados');
+      console.log("[AUDIO] Evento: loadeddata - Datos cargados");
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
 
@@ -336,7 +425,9 @@ const App: React.FC = () => {
     audio.addEventListener("loadeddata", handleLoadedData);
 
     // NO intentar autoplay aquí - se intentará cuando el usuario haga clic
-    console.log('[AUDIO] Listo para reproducir a la espera de interacción del usuario');
+    console.log(
+      "[AUDIO] Listo para reproducir a la espera de interacción del usuario",
+    );
 
     return () => {
       // Limpiar timeout de carga
@@ -366,8 +457,6 @@ const App: React.FC = () => {
     };
   }, []); // Solo ejecutar una vez al montar
 
-
-
   useEffect(() => {
     return () => {
       // Limpiar cualquier timeout pendiente al desmontar el componente
@@ -377,7 +466,10 @@ const App: React.FC = () => {
 
   // Limpiar timeout cuando el estado cambie a Playing o Paused
   useEffect(() => {
-    if (streamStatus === StreamStatus.Playing || streamStatus === StreamStatus.Paused) {
+    if (
+      streamStatus === StreamStatus.Playing ||
+      streamStatus === StreamStatus.Paused
+    ) {
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
       loadTimeoutRef.current = null;
     }
@@ -386,21 +478,25 @@ const App: React.FC = () => {
   // Manejar visibilidad de la pestaña - reintentar si vuelve a estar activa
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && streamStatus === StreamStatus.Loading) {
-        console.log('[AUDIO] Pestaña visible, verificando estado...');
+      if (
+        document.visibilityState === "visible" &&
+        streamStatusRef.current === StreamStatus.Loading
+      ) {
+        console.log("[AUDIO] Pestaña visible, verificando estado...");
         // Si está loading y la pestaña vuelve a estar visible, verificar si el audio está cargado
         if (audioRef.current && audioRef.current.readyState >= 3) {
-          console.log('[AUDIO] Audio listo, intentando reproducir...');
+          console.log("[AUDIO] Audio listo, intentando reproducir...");
           audioRef.current.play().catch(() => {
-            console.log('[AUDIO] Error al reproducir');
+            console.log("[AUDIO] Error al reproducir");
           });
         }
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [streamStatus]);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   // Verificar hash para política de privacidad
   useEffect(() => {
@@ -418,7 +514,6 @@ const App: React.FC = () => {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-
   const togglePlayPause = useCallback(() => {
     if (!audioRef.current) return;
 
@@ -434,8 +529,11 @@ const App: React.FC = () => {
       audioRef.current.load();
       // Establecer timeout para detectar si la reproducción tarda demasiado
       loadTimeoutRef.current = setTimeout(() => {
-        console.log('[AUDIO] Timeout en play(): reintentando carga...');
-        if (audioRef.current && streamStatus === StreamStatus.Loading) {
+        console.log("[AUDIO] Timeout en play(): reintentando carga...");
+        if (
+          audioRef.current &&
+          streamStatusRef.current === StreamStatus.Loading
+        ) {
           audioRef.current.src = STREAM_URL;
           audioRef.current.load();
         }
@@ -496,7 +594,10 @@ const App: React.FC = () => {
       }}
     >
       <header className="flex flex-col items-center">
-        <h1 className="sr-only">Radio Impacto Digital - La Radio del Pueblo de Dios - Transmisión en vivo 24/7</h1>
+        <h1 className="sr-only">
+          Radio Impacto Digital - La Radio del Pueblo de Dios - Transmisión en
+          vivo 24/7
+        </h1>
         <img
           src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
           alt="Radio Impacto Digital - La Radio del Pueblo de Dios - Logo oficial"
@@ -507,35 +608,76 @@ const App: React.FC = () => {
       <main className="flex flex-col items-center w-full">
         <nav aria-label="Navegación principal" className="sr-only">
           <ul className="flex flex-wrap justify-center gap-4 text-sm">
-            <li><a href="#player" className="hover:text-amber-400 transition"> Reproductor</a></li>
-            <li><a href="#volume" className="hover:text-amber-400 transition"> Volumen</a></li>
-            <li><a href="#social" className="hover:text-amber-400 transition"> Redes Sociales</a></li>
-            <li><a href="#contact" className="hover:text-amber-400 transition"> Contacto</a></li>
+            <li>
+              <a href="#player" className="hover:text-amber-400 transition">
+                {" "}
+                Reproductor
+              </a>
+            </li>
+            <li>
+              <a href="#volume" className="hover:text-amber-400 transition">
+                {" "}
+                Volumen
+              </a>
+            </li>
+            <li>
+              <a href="#social" className="hover:text-amber-400 transition">
+                {" "}
+                Redes Sociales
+              </a>
+            </li>
+            <li>
+              <a href="#contact" className="hover:text-amber-400 transition">
+                {" "}
+                Contacto
+              </a>
+            </li>
           </ul>
         </nav>
 
-        <section id="player" aria-labelledby="player-heading" className="flex flex-col items-center">
-          <h2 id="player-heading" className="sr-only">Reproductor de radio en vivo</h2>
+        <section
+          id="player"
+          aria-labelledby="player-heading"
+          className="flex flex-col items-center"
+        >
+          <h2 id="player-heading" className="sr-only">
+            Reproductor de radio en vivo
+          </h2>
           <button
             onClick={togglePlayPause}
             className="w-24 h-24 bg-black/40 rounded-full flex items-center justify-center mb-2 transition-transform duration-200 active:scale-95 overflow-hidden"
             aria-label={
-              streamStatus === StreamStatus.Playing ? "Pausar transmisión de radio" : "Reproducir transmisión de radio en vivo"
+              streamStatus === StreamStatus.Playing
+                ? "Pausar transmisión de radio"
+                : "Reproducir transmisión de radio en vivo"
             }
           >
             {renderStatusIcon()}
           </button>
 
           <div className="flex flex-col items-center my-6 space-y-4">
-            <p className="text-sm tracking-widest text-white/80 h-4" role="status" aria-live="polite">
+            <p
+              className="text-sm tracking-widest text-white/80 h-4"
+              role="status"
+              aria-live="polite"
+            >
               {getStatusText()}
             </p>
-            <p className="text-white text-lg h-6" role="status" aria-live="polite" aria-label="Canción actual">{nowPlaying}</p>
+            <p
+              className="text-white text-lg h-6"
+              role="status"
+              aria-live="polite"
+              aria-label="Canción actual"
+            >
+              {nowPlaying}
+            </p>
           </div>
         </section>
 
         <section id="volume" aria-labelledby="volume-heading">
-          <h2 id="volume-heading" className="sr-only">Control de volumen</h2>
+          <h2 id="volume-heading" className="sr-only">
+            Control de volumen
+          </h2>
           <div className="flex items-center space-x-3 w-full max-w-xs mt-6">
             <VolumeIcon className="w-6 h-6 text-amber-400" aria-hidden="true" />
             <input
@@ -605,14 +747,21 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {showPrivacy && <PrivacyPolicy onClose={() => {
-        setShowPrivacy(false);
-        if (window.location.hash === "#privacy") {
-          window.history.pushState("", document.title, window.location.pathname + window.location.search);
-        }
-      }} />}
+      {showPrivacy && (
+        <PrivacyPolicy
+          onClose={() => {
+            setShowPrivacy(false);
+            if (window.location.hash === "#privacy") {
+              window.history.pushState(
+                "",
+                document.title,
+                window.location.pathname + window.location.search,
+              );
+            }
+          }}
+        />
+      )}
     </div>
-
   );
 };
 
