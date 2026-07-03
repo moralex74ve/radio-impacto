@@ -318,6 +318,10 @@ const App: React.FC = () => {
     const handleError = (e: Event) => {
       console.error("[AUDIO] Evento: error - Error en reproducción:", e);
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+      if (streamStatusRef.current === StreamStatus.Loading) {
+        // Ya hay una reconexión en curso, no iniciar otra
+        return;
+      }
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
         console.log(
@@ -340,6 +344,9 @@ const App: React.FC = () => {
 
     const handleEnded = () => {
       console.log("[AUDIO] Evento: ended - Fin del stream, reconectando...");
+      if (streamStatusRef.current === StreamStatus.Loading) {
+        return;
+      }
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
         reconnectRef.current();
@@ -351,6 +358,10 @@ const App: React.FC = () => {
 
     const handleStalled = () => {
       console.log("[AUDIO] Evento: stalled - Flujo de datos detenido");
+      if (streamStatusRef.current === StreamStatus.Loading) {
+        // Ya hay una reconexión en curso (stalled se dispara al recargar src)
+        return;
+      }
       if (retryCountRef.current < maxRetries && audioRef.current) {
         retryCountRef.current++;
         console.log(
