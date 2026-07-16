@@ -725,7 +725,7 @@ const App: React.FC = () => {
         {/* WhatsApp button aligned to the right */}
         <div id="contact" className="w-full flex justify-end mt-4">
           <a
-            href="https://wa.me/584267793042"
+            href="https://wa.me/584267793042?text=👋%20Hola%20Bendiciones"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-3 py-2 pt-2 rounded-full shadow-md transition"
