@@ -1,0 +1,13 @@
+C:\Users\PC\Documents\Dev\impacto-digital-radio\.opencode\command\graphify-export.md
+C:\Users\PC\Documents\Dev\impacto-digital-radio\.opencode\command\graphify-query.md
+C:\Users\PC\Documents\Dev\impacto-digital-radio\.opencode\command\graphify.md
+C:\Users\PC\Documents\Dev\impacto-digital-radio\.opencode\memory\project.md
+C:\Users\PC\Documents\Dev\impacto-digital-radio\AGENTS.md
+C:\Users\PC\Documents\Dev\impacto-digital-radio\CLAUDE.md
+C:\Users\PC\Documents\Dev\impacto-digital-radio\README.md
+C:\Users\PC\Documents\Dev\impacto-digital-radio\index.html
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\app\index.html
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\googledf254dc88e2d697d.html
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\robots.txt
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\vivo\index.html
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\youtube\index.html

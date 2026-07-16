@@ -1,0 +1,9 @@
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\Imgur.webp
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\Logo.svg
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\apple-touch-icon.png
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\favicon-16x16.png
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\favicon-32x32.png
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\icon-192.png
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\icon-512.png
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\instagram.svg
+C:\Users\PC\Documents\Dev\impacto-digital-radio\public\og-image.webp

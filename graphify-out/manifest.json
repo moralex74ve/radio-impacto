@@ -1,0 +1,232 @@
+{
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.openclaude\\settings.local.json": {
+    "mtime": 1776968930.6598935,
+    "ast_hash": "02e7f20c92e4838c1d1d7df6836b4d27",
+    "semantic_hash": "02e7f20c92e4838c1d1d7df6836b4d27"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.opencode\\opencode.json": {
+    "mtime": 1780608216.9638374,
+    "ast_hash": "1efe24ecf938911d4f23e4b1c6ec91f7",
+    "semantic_hash": "1efe24ecf938911d4f23e4b1c6ec91f7"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.opencode\\package.json": {
+    "mtime": 1780606574.1352873,
+    "ast_hash": "d3ab821609ec487b22aa5b0027f5f400",
+    "semantic_hash": "d3ab821609ec487b22aa5b0027f5f400"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.opencode\\plugins\\graphify.js": {
+    "mtime": 1780607159.0472739,
+    "ast_hash": "32b67963417a30cb80544e0b2a56a98d",
+    "semantic_hash": "32b67963417a30cb80544e0b2a56a98d"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\index.tsx": {
+    "mtime": 1768016416.30803,
+    "ast_hash": "362e3bf1bab11e18d2139e32e19fdb2d",
+    "semantic_hash": "362e3bf1bab11e18d2139e32e19fdb2d"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\metadata.json": {
+    "mtime": 1771506716.0736232,
+    "ast_hash": "205c135991707d52275dad411059f4ee",
+    "semantic_hash": "205c135991707d52275dad411059f4ee"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\package.json": {
+    "mtime": 1779217628.0084977,
+    "ast_hash": "01f50b2edf6e1617c046dcb25952a233",
+    "semantic_hash": "01f50b2edf6e1617c046dcb25952a233"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\manifest.json": {
+    "mtime": 1773773467.2038326,
+    "ast_hash": "e1ae8c2a56b45828048f72ddac664a56",
+    "semantic_hash": "e1ae8c2a56b45828048f72ddac664a56"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\sw.js": {
+    "mtime": 1773788716.9786136,
+    "ast_hash": "54b334ac72329ea8c9fb7c71248620c5",
+    "semantic_hash": "54b334ac72329ea8c9fb7c71248620c5"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\App.backup.tsx": {
+    "mtime": 1773625469.4670646,
+    "ast_hash": "e4e982d4348cdf77a05fb93c492e4112",
+    "semantic_hash": "e4e982d4348cdf77a05fb93c492e4112"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\App.tsx": {
+    "mtime": 1779458938.20125,
+    "ast_hash": "6ffa80eda142c629ac6ac6a3a8d12aab",
+    "semantic_hash": "6ffa80eda142c629ac6ac6a3a8d12aab"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\InstallButton.tsx": {
+    "mtime": 1769826127.060756,
+    "ast_hash": "046a201af58358460972e6fb78a20b6f",
+    "semantic_hash": "046a201af58358460972e6fb78a20b6f"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\OfflineIcon.tsx": {
+    "mtime": 1762630612.0,
+    "ast_hash": "7bb5e5d7006af41b4506cc74b26ea6dd",
+    "semantic_hash": "7bb5e5d7006af41b4506cc74b26ea6dd"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\PauseIcon.tsx": {
+    "mtime": 1762630612.0,
+    "ast_hash": "ec37534f51ba21e03e2ac3320639c31a",
+    "semantic_hash": "ec37534f51ba21e03e2ac3320639c31a"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\PlayIcon.tsx": {
+    "mtime": 1762630612.0,
+    "ast_hash": "a2cc191e5c7f554a73c4e643acba82ec",
+    "semantic_hash": "a2cc191e5c7f554a73c4e643acba82ec"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\PrivacyPolicy.tsx": {
+    "mtime": 1771506714.0821378,
+    "ast_hash": "995fe411c37a979e335c54fc99ab67fa",
+    "semantic_hash": "995fe411c37a979e335c54fc99ab67fa"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\ShareButton.tsx": {
+    "mtime": 1773788041.5344343,
+    "ast_hash": "25e809d82366d578217cbaff42c3aa42",
+    "semantic_hash": "25e809d82366d578217cbaff42c3aa42"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\SocialIcons.backup.tsx": {
+    "mtime": 1773694763.9785213,
+    "ast_hash": "26a6b68f3dfc39a6136e4c7bb9a2e10a",
+    "semantic_hash": "26a6b68f3dfc39a6136e4c7bb9a2e10a"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\SocialIcons.tsx": {
+    "mtime": 1773758203.1339717,
+    "ast_hash": "8a8c9f69d0a203bd9c00f7df9f4299fb",
+    "semantic_hash": "8a8c9f69d0a203bd9c00f7df9f4299fb"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\SpinnerIcon.tsx": {
+    "mtime": 1762630612.0,
+    "ast_hash": "93ce0077f127b10abad51195ab1819b1",
+    "semantic_hash": "93ce0077f127b10abad51195ab1819b1"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\components\\VolumeIcon.tsx": {
+    "mtime": 1762630612.0,
+    "ast_hash": "ae37edacefbb7ec60077f4d88b936300",
+    "semantic_hash": "ae37edacefbb7ec60077f4d88b936300"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\src\\types.ts": {
+    "mtime": 1762630612.0,
+    "ast_hash": "597cc54da16f38d895e26e456540e4e6",
+    "semantic_hash": "597cc54da16f38d895e26e456540e4e6"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\tsconfig.json": {
+    "mtime": 1762979723.3234584,
+    "ast_hash": "0d2615cec18a07cfcf83dfa5756b81ce",
+    "semantic_hash": "0d2615cec18a07cfcf83dfa5756b81ce"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\vite.config.ts": {
+    "mtime": 1773773463.1518595,
+    "ast_hash": "53d9a2727114814350f740c469f68e35",
+    "semantic_hash": "53d9a2727114814350f740c469f68e35"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.opencode\\command\\graphify-export.md": {
+    "mtime": 1780608052.770326,
+    "ast_hash": "4341d50732f292527128eb36dae1be0c",
+    "semantic_hash": "4341d50732f292527128eb36dae1be0c"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.opencode\\command\\graphify-query.md": {
+    "mtime": 1780608051.968602,
+    "ast_hash": "f90ba57033dd8a7925f4946f1bbdb2c1",
+    "semantic_hash": "f90ba57033dd8a7925f4946f1bbdb2c1"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.opencode\\command\\graphify.md": {
+    "mtime": 1780608050.96387,
+    "ast_hash": "d727ce569906628bd83291f9abbcd88a",
+    "semantic_hash": "d727ce569906628bd83291f9abbcd88a"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\.opencode\\memory\\project.md": {
+    "mtime": 1776967665.6697218,
+    "ast_hash": "bc064defc4070338e269c66c654bbba2",
+    "semantic_hash": "bc064defc4070338e269c66c654bbba2"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\AGENTS.md": {
+    "mtime": 1779217342.915665,
+    "ast_hash": "2567384d5fa07c12901ab3623bb7efef",
+    "semantic_hash": "2567384d5fa07c12901ab3623bb7efef"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\CLAUDE.md": {
+    "mtime": 1780607720.2298265,
+    "ast_hash": "48e6061d2c6148087693cc5f831016b9",
+    "semantic_hash": "48e6061d2c6148087693cc5f831016b9"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\README.md": {
+    "mtime": 1774706650.2760832,
+    "ast_hash": "d3a01322de2e3cb3637eac4ecf57847d",
+    "semantic_hash": "d3a01322de2e3cb3637eac4ecf57847d"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\index.html": {
+    "mtime": 1773788727.6891456,
+    "ast_hash": "fa23578ffe5265eb9ba84f9b6199b6f8",
+    "semantic_hash": "fa23578ffe5265eb9ba84f9b6199b6f8"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\app\\index.html": {
+    "mtime": 1773791168.065485,
+    "ast_hash": "3c61c0f6c1f4991368916e9f3a25571b",
+    "semantic_hash": "3c61c0f6c1f4991368916e9f3a25571b"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\googledf254dc88e2d697d.html": {
+    "mtime": 1768013315.3829856,
+    "ast_hash": "ec4b548bfc1819ea468998208e20312c",
+    "semantic_hash": "ec4b548bfc1819ea468998208e20312c"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\robots.txt": {
+    "mtime": 1773773473.3092299,
+    "ast_hash": "72e8905f3df1e1e1eb6eaa202d612138",
+    "semantic_hash": "72e8905f3df1e1e1eb6eaa202d612138"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\vivo\\index.html": {
+    "mtime": 1773792412.9831028,
+    "ast_hash": "b82895e981ea2df2600388780457c625",
+    "semantic_hash": "b82895e981ea2df2600388780457c625"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\youtube\\index.html": {
+    "mtime": 1773791170.0906951,
+    "ast_hash": "21e90599b5bcfb655a702a0d75615df4",
+    "semantic_hash": "21e90599b5bcfb655a702a0d75615df4"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\Imgur.webp": {
+    "mtime": 1768017182.0806289,
+    "ast_hash": "b71f430f9dbbed2fd48da68488bd3270",
+    "semantic_hash": "b71f430f9dbbed2fd48da68488bd3270"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\Logo.svg": {
+    "mtime": 1757946671.4454792,
+    "ast_hash": "7c81d4565ef63fa1b74f3469f073503a",
+    "semantic_hash": "7c81d4565ef63fa1b74f3469f073503a"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\apple-touch-icon.png": {
+    "mtime": 1762816502.0,
+    "ast_hash": "99889dad7ba89f370b816338298b95b8",
+    "semantic_hash": "99889dad7ba89f370b816338298b95b8"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\favicon-16x16.png": {
+    "mtime": 1762816502.0,
+    "ast_hash": "145546dbd1014838dd8913655f187d4e",
+    "semantic_hash": "145546dbd1014838dd8913655f187d4e"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\favicon-32x32.png": {
+    "mtime": 1762816502.0,
+    "ast_hash": "68e43a3faa90b32e10f96929cbe5d650",
+    "semantic_hash": "68e43a3faa90b32e10f96929cbe5d650"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\icon-192.png": {
+    "mtime": 1762816502.0,
+    "ast_hash": "75fc5888fcde4713d3079866ccaf8a8c",
+    "semantic_hash": "75fc5888fcde4713d3079866ccaf8a8c"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\icon-512.png": {
+    "mtime": 1762816502.0,
+    "ast_hash": "a8a9d1e050283304904c1da628c230db",
+    "semantic_hash": "a8a9d1e050283304904c1da628c230db"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\instagram.svg": {
+    "mtime": 1764952349.5324667,
+    "ast_hash": "d7d631be79a9778ab9dcf864101b4084",
+    "semantic_hash": "d7d631be79a9778ab9dcf864101b4084"
+  },
+  "C:\\Users\\PC\\Documents\\Dev\\impacto-digital-radio\\public\\og-image.webp": {
+    "mtime": 1768010141.6580641,
+    "ast_hash": "156f6fa94936f2b00e2cfd110ee41bc6",
+    "semantic_hash": "156f6fa94936f2b00e2cfd110ee41bc6"
+  }
+}
