@@ -110,9 +110,21 @@ const App: React.FC = () => {
 
     const performReconnect = () => {
       if (!audioRef.current) return;
-      console.log("[AUDIO] Iniciando reconexión del stream...");
+
+      retryCountRef.current++;
+      console.log(
+        `[AUDIO] Iniciando reconexión del stream... (intento ${retryCountRef.current}/${maxRetries})`,
+      );
 
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+
+      // Si superamos el máximo de reintentos, marcar offline
+      if (retryCountRef.current > maxRetries) {
+        console.log("[AUDIO] Max retries alcanzados en reconexión");
+        setStreamStatus(StreamStatus.Offline);
+        retryCountRef.current = 0;
+        return;
+      }
 
       setStreamStatus(StreamStatus.Loading);
 
@@ -120,8 +132,11 @@ const App: React.FC = () => {
 
       try {
         audioRef.current.pause();
-        // Asignar una URL limpia para forzar al navegador a desechar la conexión rota y abrir una nueva
-        audioRef.current.src = STREAM_URL;
+        // Limpiar la conexión rota antes de asignar nueva URL
+        audioRef.current.removeAttribute("src");
+        audioRef.current.load();
+        // Cache-busting para forzar conexión nueva
+        audioRef.current.src = STREAM_URL + "?_t=" + Date.now();
         audioRef.current.load();
         audioRef.current.volume = currentVolume;
 
@@ -132,11 +147,10 @@ const App: React.FC = () => {
           );
         });
 
-        // Timeout de salvaguarda con backoff exponencial: 5s, 7.5s, 11.25s, 17s, 25s
-        // Evita martillar el servidor cuando está sobrecargado
+        // Backoff exponencial: 2s, 3s, 4.5s, 7s, 10s (máx 15s)
         const backoffMs = Math.min(
-          5000 * Math.pow(1.5, Math.max(0, retryCountRef.current - 1)),
-          30000,
+          2000 * Math.pow(1.5, Math.max(0, retryCountRef.current - 1)),
+          15000,
         );
         loadTimeoutRef.current = setTimeout(() => {
           if (
@@ -144,7 +158,7 @@ const App: React.FC = () => {
             streamStatusRef.current === StreamStatus.Loading
           ) {
             console.log(
-              `[AUDIO] Timeout en reconexión (${backoffMs}ms), reintentando de nuevo...`,
+              `[AUDIO] Timeout en reconexión (${backoffMs}ms), reintentando...`,
             );
             reconnectStream(0);
           }
@@ -188,8 +202,8 @@ const App: React.FC = () => {
         return; // Ignorar si el usuario lo pausó deliberadamente
       }
 
-      // Verificar congelamiento después de 15 segundos de reproducción
-      if (elapsedSeconds < 15) {
+      // Verificar congelamiento después de 10 segundos de reproducción
+      if (elapsedSeconds < 10) {
         lastTime = currentTime;
         return;
       }
@@ -239,7 +253,7 @@ const App: React.FC = () => {
           audioRef.current.src = STREAM_URL;
           audioRef.current.load();
         }
-      }, 5000); // 5 segundos timeout
+      }, 3000); // 3 segundos timeout
     };
 
     const handleProgress = () => {
@@ -282,7 +296,7 @@ const App: React.FC = () => {
             );
             reconnectRef.current();
           }
-        }, 6000); // Esperar 6 segundos solo durante carga
+        }, 4000); // Esperar 4 segundos solo durante carga
       }
     };
 
@@ -548,7 +562,7 @@ const App: React.FC = () => {
           audioRef.current.src = STREAM_URL;
           audioRef.current.load();
         }
-      }, 8000);
+      }, 5000);
       audioRef.current.play().catch(() => {
         setStreamStatus(StreamStatus.Offline);
         if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
