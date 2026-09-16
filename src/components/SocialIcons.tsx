@@ -1,8 +1,11 @@
 import React from 'react';
 import { ShareButton } from './ShareButton';
 
-/** Nombre del APK publicado en la raíz del sitio (carpeta public/). */
+/** APK publicado en la raíz del sitio (carpeta public/). */
 const APK_FILENAME = "ImpactoDigitalFM-v1.0-release.apk";
+/** Versión usada como cache-buster: al publicar un APK nuevo se debe incrementar. */
+const APK_VERSION = "1.0";
+const APK_DOWNLOAD_URL = `${(import.meta as any).env.BASE_URL}${APK_FILENAME}?v=${APK_VERSION}`;
 
 export const SocialIcons = () => {
   const links = {
@@ -108,7 +111,7 @@ export const SocialIcons = () => {
 
       {/* APK Download (Play Store Icon) */}
       <a
-        href={`${(import.meta as any).env.BASE_URL}${APK_FILENAME}`}
+        href={APK_DOWNLOAD_URL}
         download={APK_FILENAME}
         className="group transition-transform duration-200 hover:scale-110"
         aria-label="Descargar aplicación para Android (APK)"
