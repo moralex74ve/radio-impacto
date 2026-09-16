@@ -1,6 +1,9 @@
 import React from 'react';
 import { ShareButton } from './ShareButton';
 
+/** Nombre del APK publicado en la raíz del sitio (carpeta public/). */
+const APK_FILENAME = "ImpactoDigitalFM-v1.0-release.apk";
+
 export const SocialIcons = () => {
   const links = {
     facebook: {
@@ -105,8 +108,8 @@ export const SocialIcons = () => {
 
       {/* APK Download (Play Store Icon) */}
       <a
-        href={`${(import.meta as any).env.BASE_URL}ImpactoDigitalFM.apk`}
-        download="ImpactoDigitalFM.apk"
+        href={`${(import.meta as any).env.BASE_URL}${APK_FILENAME}`}
+        download={APK_FILENAME}
         className="group transition-transform duration-200 hover:scale-110"
         aria-label="Descargar aplicación para Android (APK)"
       >

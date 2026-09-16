@@ -98,8 +98,8 @@ export const SocialIcons = () => {
 
       {/* APK Download (Play Store Icon) */}
       <a
-        href={`${(import.meta as any).env.BASE_URL}ImpactoDigitalFM.apk`}
-        download="ImpactoDigitalFM.apk"
+        href={`${(import.meta as any).env.BASE_URL}ImpactoDigitalFM-v1.0-release.apk`}
+        download="ImpactoDigitalFM-v1.0-release.apk"
         className="group transition-transform duration-200 hover:scale-110"
         aria-label="Descargar aplicación para Android (APK)"
       >
