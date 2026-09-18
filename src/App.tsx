@@ -26,6 +26,8 @@ const App: React.FC = () => {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Nº de intentos de reconexión ya realizados. Lo incrementa SOLO reconnectStream,
+  // para que cada intento consuma exactamente una unidad del presupuesto.
   const retryCountRef = useRef(0);
   const maxRetries = 5;
 
@@ -337,9 +339,8 @@ const App: React.FC = () => {
         return;
       }
       if (retryCountRef.current < maxRetries && audioRef.current) {
-        retryCountRef.current++;
         console.log(
-          `[AUDIO] Error: reintento ${retryCountRef.current}/${maxRetries}`,
+          `[AUDIO] Error: reintento ${retryCountRef.current + 1}/${maxRetries}`,
         );
         reconnectRef.current();
       } else {
@@ -362,7 +363,6 @@ const App: React.FC = () => {
         return;
       }
       if (retryCountRef.current < maxRetries && audioRef.current) {
-        retryCountRef.current++;
         reconnectRef.current();
       } else {
         setStreamStatus(StreamStatus.Offline);
@@ -377,9 +377,8 @@ const App: React.FC = () => {
         return;
       }
       if (retryCountRef.current < maxRetries && audioRef.current) {
-        retryCountRef.current++;
         console.log(
-          `[AUDIO] Stalled: reintento ${retryCountRef.current}/${maxRetries}`,
+          `[AUDIO] Stalled: reintento ${retryCountRef.current + 1}/${maxRetries}`,
         );
         reconnectRef.current();
       } else {
@@ -615,7 +614,7 @@ const App: React.FC = () => {
     <div
       className="flex flex-col items-center justify-start pt-4 text-center min-h-screen bg-gray-900 text-white font-sans overflow-hidden bg-no-repeat bg-cover bg-center bg-fixed p-4"
       style={{
-        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent, rgba(0, 0, 0, 0.7)), url(${(import.meta as any).env.BASE_URL}Imgur.webp)`,
+        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent, rgba(0, 0, 0, 0.7)), url("${import.meta.env.BASE_URL}Imgur.webp")`,
       }}
     >
       <header className="flex flex-col items-center">
@@ -624,7 +623,7 @@ const App: React.FC = () => {
           vivo 24/7
         </h1>
         <img
-          src={`${(import.meta as any).env.BASE_URL}Logo.svg`}
+          src={`${import.meta.env.BASE_URL}Logo.svg`}
           alt="Radio Impacto Digital - La Radio del Pueblo de Dios - Logo oficial"
           className="block w-72 md:w-80 h-40 md:h-44 mb-0 p-0 object-cover"
         />

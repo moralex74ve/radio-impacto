@@ -5,7 +5,7 @@ import { ShareButton } from './ShareButton';
 const APK_FILENAME = "ImpactoDigitalFM-v1.0-release.apk";
 /** Versión usada como cache-buster: al publicar un APK nuevo se debe incrementar. */
 const APK_VERSION = "1.0";
-const APK_DOWNLOAD_URL = `${(import.meta as any).env.BASE_URL}${APK_FILENAME}?v=${APK_VERSION}`;
+const APK_DOWNLOAD_URL = `${import.meta.env.BASE_URL}${APK_FILENAME}?v=${APK_VERSION}`;
 
 export const SocialIcons = () => {
   const links = {
