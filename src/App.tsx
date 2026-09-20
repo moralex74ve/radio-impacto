@@ -19,8 +19,16 @@ const App: React.FC = () => {
     StreamStatus.Paused,
   );
   const [volume, setVolume] = useState(() => {
-    const savedVolume = localStorage.getItem("radio-volume");
-    return savedVolume ? parseFloat(savedVolume) : 0.4;
+    // Guarda para entornos sin `localStorage` (solo afecta al render en el build;
+    // en el navegador el comportamiento es idéntico al de antes).
+    if (typeof localStorage === "undefined") return 0.4;
+    try {
+      const savedVolume = localStorage.getItem("radio-volume");
+      const parsed = savedVolume ? parseFloat(savedVolume) : 0.4;
+      return Number.isFinite(parsed) ? parsed : 0.4;
+    } catch {
+      return 0.4;
+    }
   });
   const [nowPlaying, setNowPlaying] = useState<string>("Radio Impacto Digital");
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -769,6 +777,46 @@ const App: React.FC = () => {
             Política de Privacidad
           </button>
         </div>
+
+        {/* Información de la emisora. Plegada por defecto: el diseño sigue
+            siendo el de una sola pantalla. El texto es real y visible para
+            quien lo despliegue, y los buscadores lo leen igualmente. */}
+        <details className="w-full max-w-md mx-auto mt-2 mb-6 text-left">
+          <summary className="cursor-pointer list-none text-center text-xs text-white/50 hover:text-white/80 transition-colors underline">
+            Sobre Radio Impacto Digital
+          </summary>
+          <div className="mt-4 space-y-4 text-sm leading-relaxed text-white/75">
+            <p>
+              <strong className="text-white">Radio Impacto Digital</strong>, «La
+              Radio del Pueblo de Dios», es una emisora cristiana que transmite
+              por internet las 24 horas. Puedes escuchar radio cristiana en vivo
+              gratis, sin registro y sin instalar nada: basta con pulsar el botón
+              de reproducción.
+            </p>
+            <p>
+              La señal es continua y alterna música cristiana con mensajes de fe,
+              predicaciones y enseñanzas, para acompañarte mientras trabajas,
+              estudias, conduces o descansas. Mientras suena, verás el título de
+              la canción en curso.
+            </p>
+            <p>
+              Funciona en Chrome, Safari, Firefox, Edge y Brave, tanto en
+              ordenador como en móvil o tableta. También puedes instalarla en la
+              pantalla de inicio para abrirla como una aplicación, o descargar la
+              app para Android.
+            </p>
+            <p>
+              Para pedir una canción, enviar una petición de oración o saludarnos,
+              escríbenos por WhatsApp. Y síguenos en Facebook, Instagram y YouTube
+              para estar al tanto de las novedades.
+            </p>
+            <p>
+              Si el audio no suena, comprueba el volumen del dispositivo y vuelve
+              a pulsar el botón de reproducción: algunos navegadores exigen ese
+              toque para empezar. Si el problema continúa, recarga la página.
+            </p>
+          </div>
+        </details>
       </footer>
 
       {showPrivacy && (

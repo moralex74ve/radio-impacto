@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-impacto-digital-v4';
+const CACHE_NAME = 'radio-impacto-digital-v5';
 const BASE_PATH = '/';
 
 const urlsToCache = [

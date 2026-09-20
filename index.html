@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <base href="/" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO Meta Tags -->
   <title>Radio Impacto Digital | La Radio del Pueblo de Dios - Escucha en Vivo 24/7</title>
@@ -99,7 +99,7 @@
     // Registrar el Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=4')
+        navigator.serviceWorker.register('/sw.js?v=5')
           .then(registration => {
             console.log('ServiceWorker registrado con éxito:', registration.scope);
           })

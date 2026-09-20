@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /
 
-# Sitemap (descomentar cuando tengas un sitemap)
+# Páginas de redirección (APK y YouTube): no tienen contenido propio.
+Disallow: /app/
+Disallow: /vivo/
+Disallow: /youtube/
+
 Sitemap: https://impactodigitalfm.com/sitemap.xml
