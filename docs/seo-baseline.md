@@ -53,19 +53,44 @@ puede decir si Google ya indexó. Para eso hay que mirar Search Console o buscar
 
 ## Qué comparar en la próxima revisión
 
-1. ¿Aparece `impactodigitalfm.com` en `site:` de **Google**?
-2. ¿Aparece en `site:` de **Bing** (y por tanto en Brave)?
-3. ¿Aparece al buscar `"Radio Impacto Digital"` o `radio impacto digital venezuela`?
-4. ¿Hay menciones o enlaces externos nuevos?
-5. En **Google Search Console** → *Cobertura* / *Páginas*: ¿estado "Indexada" o "Detectada, sin indexar"?
-6. En **Bing Webmaster Tools**: ¿la URL fue rastreada tras el envío de IndexNow?
+> **Corrección importante:** el operador `cache:` de Google **ya no existe**.
+> Google lo retiró en septiembre de 2024 y borró su documentación. No sirve para
+> comprobar indexación. Métodos válidos a día de hoy: `site:`, Search Console y
+> los logs del servidor.
 
-Plazos realistas: para un dominio nuevo sin enlaces, la primera indexación suele tardar **de días a varias semanas**. Que no aparezca en 3-7 días no es necesariamente un fallo.
+Consultas exactas a lanzar, en este orden:
 
----
+| # | Consulta / acción | Qué indica |
+|---|---|---|
+| 1 | `site:impactodigitalfm.com` en **Google** | Si aparece, está indexada. Es la prueba principal |
+| 2 | `site:impactodigitalfm.com` en **Bing** | Índice de Bing; alimenta también a Brave |
+| 3 | `"Radio Impacto Digital"` en Google y Bing | Indexación por marca (más fácil de conseguir que por temática) |
+| 4 | `"impactodigitalfm.com"` | Menciones del dominio en otros sitios (señal de enlaces) |
+| 5 | `radio impacto digital venezuela` | Si ya rankea por marca + país |
+| 6 | **Search Console** → *Indexación → Páginas* | Estado real y autoritativo. Ver leyenda abajo |
+| 7 | **Bing Webmaster Tools** → *Rastreo* | Si Bingbot visitó tras el IndexNow del 2026-09-20 |
 
-## Limitaciones de esta medición
+### Cómo interpretar el estado en Search Console
 
-- La herramienta de búsqueda del agente **no consulta Google directamente**. Es un índice propio, así que un "sin resultados" aquí no prueba al 100% que Google no lo tenga indexado.
-- La comprobación fiable es **Google Search Console** y **Bing Webmaster Tools**, que el propietario del sitio puede consultar con su cuenta.
-- No se pueden leer los logs del servidor (GitHub Pages + Cloudflare) para ver visitas de Googlebot.
+| Estado | Significado | Acción |
+|---|---|---|
+| *Indexada* | Objetivo conseguido | Ninguna |
+| *Detectada, sin indexar* | Google la conoce, aún no la ha procesado | Esperar; es normal en dominio nuevo |
+| *Rastreada, sin indexar* | Google la leyó y decidió no indexarla todavía | Casi siempre falta autoridad → enlaces (`docs/acciones-seo.md`) |
+| *Excluida por noindex* | **Error**: algo está bloqueando | Revisar `robots.txt` y las metas `noindex` |
+| *Error de rastreo* | Problema técnico | Revisar el motivo concreto que indique |
+
+### Límite de lo que puede hacer el agente
+
+- La búsqueda web del agente **no consulta Google directamente**: es un índice
+  propio. Un "sin resultados" ahí no prueba al 100% que Google no la tenga.
+- Las comprobaciones autoritativas (filas 6 y 7) requieren la cuenta del
+  propietario en Search Console y Bing Webmaster Tools.
+- No se pueden leer los logs del servidor (GitHub Pages + Cloudflare) para ver
+  visitas de Googlebot.
+
+### Plazos realistas
+
+Para un dominio nuevo sin enlaces, la primera indexación tarda **de días a
+varias semanas**. Que no aparezca en 3-7 días **no es un fallo**: es lo normal.
+La palanca real son los enlaces externos, no el código.
