@@ -28,6 +28,29 @@
 
 ---
 
+## Cuándo hacer la próxima revisión
+
+**No antes del 2026-09-27** (7 días después de la línea base). Medir antes no
+aporta nada: ningún buscador indexa un dominio nuevo en horas.
+
+- **Revisión temprana (3-4 días, 2026-09-23/24):** solo para Bing/Brave, que es
+  más rápido y ya recibió el IndexNow.
+- **Revisión principal (7 días, 2026-09-27):** Google + Bing + menciones externas.
+- **Revisión de seguimiento (30 días, 2026-10-20):** aquí ya se puede valorar
+  si los enlaces externos están funcionando.
+
+Comprobación on-site automatizada en cualquier momento:
+
+```bash
+node docs/check-seo-status.mjs
+```
+
+Ese script verifica que el despliegue sigue correcto (10 checks), pero **no**
+puede decir si Google ya indexó. Para eso hay que mirar Search Console o buscar
+`site:impactodigitalfm.com` a mano.
+
+---
+
 ## Qué comparar en la próxima revisión
 
 1. ¿Aparece `impactodigitalfm.com` en `site:` de **Google**?
