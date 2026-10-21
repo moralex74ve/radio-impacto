@@ -634,6 +634,10 @@ const App: React.FC = () => {
           src={`${import.meta.env.BASE_URL}Logo.svg`}
           alt="Radio Impacto Digital - La Radio del Pueblo de Dios - Logo oficial"
           className="block w-72 md:w-80 h-40 md:h-44 mb-0 p-0 object-cover"
+          width={288}
+          height={160}
+          fetchPriority="high"
+          decoding="sync"
         />
       </header>
 
@@ -732,6 +736,29 @@ const App: React.FC = () => {
             <SocialIcons />
           </div>
         </nav>
+
+        {/* Botón Pedir Oración */}
+        <div className="mt-4 flex justify-center">
+          <a
+            href="https://chat.whatsapp.com/L4uBXsjz1nX5jteUcBZ8fw"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-full shadow-md transition transform hover:scale-105 active:scale-95"
+            aria-label="Pedir Oración - Unirse al grupo de WhatsApp"
+          >
+            <svg
+              className="w-5 h-5 mr-2"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path d="M20.52 3.48A11.93 11.93 0 0012 0C5.373 0 .01 5.373 0 12c0 2.116.55 4.142 1.6 5.95L0 24l6.264-1.627A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12 0-3.204-1.248-6.206-3.48-8.52zM12 22.08c-1.9 0-3.74-.5-5.36-1.44l-.38-.23-3.72.97.99-3.62-.24-.37A9.07 9.07 0 013 11.99c0-5 4.01-9.01 9-9.01 2.41 0 4.68.94 6.39 2.66A8.99 8.99 0 0121 11.99c0 4.97-4.03 9-9 9.01z" />
+              <path d="M17.3 14.07c-.28-.14-1.65-.81-1.9-.9-.26-.09-.45-.14-.64.14-.2.28-.78.9-.96 1.08-.18.18-.36.2-.64.07-.28-.14-1.18-.43-2.25-1.39-.83-.74-1.39-1.66-1.55-1.94-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.47.14-.16.19-.28.28-.46.09-.18.05-.35-.02-.49-.07-.14-.64-1.54-.88-2.12-.23-.56-.47-.48-.64-.49l-.55-.01c-.18 0-.47.07-.72.34-.25.28-.96.94-.96 2.3 0 1.36.98 2.68 1.12 2.86.14.18 1.94 3 4.7 4.2 2.76 1.2 2.76.8 3.26.75.5-.05 1.65-.67 1.88-1.32.23-.65.23-1.2.16-1.32-.07-.12-.26-.18-.54-.32z" />
+            </svg>
+            <span className="text-sm font-medium">Pedir Oración</span>
+          </a>
+        </div>
       </main>
 
       <footer className="flex flex-col items-center w-full">
@@ -746,11 +773,11 @@ const App: React.FC = () => {
         {/* WhatsApp button aligned to the right */}
         <div id="contact" className="w-full flex justify-end mt-4">
           <a
-            href="https://wa.me/584267793042?text=👋%20Hola%20Bendiciones"
+            href="https://wa.me/584267793042?text=%C2%A1Hola%20Impacto%20Digital%20FM!%20%F0%9F%8E%A7%20Estoy%20escuchando%20la%20programaci%C3%B3n%20en%20vivo%20desde%20la%20web%20y%20quer%C3%ADa%20enviar%20un%20mensaje."
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-3 py-2 pt-2 rounded-full shadow-md transition"
-            aria-label="Contactar por WhatsApp al +58 426 779 3042"
+            aria-label="Contactar por WhatsApp Cabina al +58 426 779 3042"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -762,7 +789,7 @@ const App: React.FC = () => {
               <path d="M20.52 3.48A11.93 11.93 0 0012 0C5.373 0 .01 5.373 0 12c0 2.116.55 4.142 1.6 5.95L0 24l6.264-1.627A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12 0-3.204-1.248-6.206-3.48-8.52zM12 22.08c-1.9 0-3.74-.5-5.36-1.44l-.38-.23-3.72.97.99-3.62-.24-.37A9.07 9.07 0 013 11.99c0-5 4.01-9.01 9-9.01 2.41 0 4.68.94 6.39 2.66A8.99 8.99 0 0121 11.99c0 4.97-4.03 9-9 9.01z" />
               <path d="M17.3 14.07c-.28-.14-1.65-.81-1.9-.9-.26-.09-.45-.14-.64.14-.2.28-.78.9-.96 1.08-.18.18-.36.2-.64.07-.28-.14-1.18-.43-2.25-1.39-.83-.74-1.39-1.66-1.55-1.94-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.47.14-.16.19-.28.28-.46.09-.18.05-.35-.02-.49-.07-.14-.64-1.54-.88-2.12-.23-.56-.47-.48-.64-.49l-.55-.01c-.18 0-.47.07-.72.34-.25.28-.96.94-.96 2.3 0 1.36.98 2.68 1.12 2.86.14.18 1.94 3 4.7 4.2 2.76 1.2 2.76.8 3.26.75.5-.05 1.65-.67 1.88-1.32.23-.65.23-1.2.16-1.32-.07-.12-.26-.18-.54-.32z" />
             </svg>
-            <span className="text-sm font-medium">Escríbenos</span>
+            <span className="text-sm font-medium">Cabina</span>
           </a>
         </div>
 

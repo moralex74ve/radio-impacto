@@ -88,7 +88,8 @@
       -webkit-tap-highlight-color: transparent;
     }
   </style>
-  <link rel="preload" as="image" href="/Logo.svg" />
+  <!-- LCP: precarga de la imagen principal con prioridad alta -->
+  <link rel="preload" as="image" href="/Logo.svg" type="image/svg+xml" fetchpriority="high" />
   <link rel="stylesheet" href="/index.css">
 </head>
 
@@ -99,7 +100,7 @@
     // Registrar el Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=5')
+        navigator.serviceWorker.register('/sw.js?v=6')
           .then(registration => {
             console.log('ServiceWorker registrado con éxito:', registration.scope);
           })
