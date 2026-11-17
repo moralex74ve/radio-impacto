@@ -2,9 +2,9 @@ import React from 'react';
 import { ShareButton } from './ShareButton';
 
 /** APK publicado en la raíz del sitio (carpeta public/). */
-const APK_FILENAME = "ImpactoDigitalFM-v1.0-release.apk";
+const APK_FILENAME = "ImpactoDigitalFM-v2.0-release.apk";
 /** Versión usada como cache-buster: al publicar un APK nuevo se debe incrementar. */
-const APK_VERSION = "1.0";
+const APK_VERSION = "2.0";
 const APK_DOWNLOAD_URL = `${import.meta.env.BASE_URL}${APK_FILENAME}?v=${APK_VERSION}`;
 
 export const SocialIcons = () => {
